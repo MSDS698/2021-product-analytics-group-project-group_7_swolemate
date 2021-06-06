@@ -38,14 +38,16 @@ def setup_cfg(args):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description="Detectron2 demo for builtin configs")
+    parser = argparse.ArgumentParser(
+        description="Detectron2 demo for builtin configs")
     parser.add_argument(
         "--config-file",
         default="configs/quick_schedules/mask_rcnn_R_50_FPN_inference_acc_test.yaml",
         metavar="FILE",
         help="path to config file",
     )
-    parser.add_argument("--webcam", action="store_true", help="Take inputs from webcam.")
+    parser.add_argument("--webcam", action="store_true",
+                        help="Take inputs from webcam.")
     parser.add_argument("--video-input", help="Path to video file.")
     parser.add_argument(
         "--input",
@@ -93,15 +95,17 @@ def test_opencv_video_format(codec, file_ext):
 
 def get_kpoints(predictions):
     res = predictions['instances'].pred_keypoints.cpu().detach().numpy()[0]
-    kpoints = [ "nose", "left_eye", "right_eye", "left_ear", "right_ear",
+    kpoints = ["nose", "left_eye", "right_eye", "left_ear", "right_ear",
                "left_shoulder", "right_shoulder", "left_elbow", "right_elbow",
                "left_wrist", "right_wrist", "left_hip", "right_hip",
-               "left_knee", "right_knee", "left_ankle", "right_ankle" ]
+               "left_knee", "right_knee", "left_ankle", "right_ankle"]
     dic_res = {}
     for i in range(17):
-        dic_res[kpoints[i]] = [float(res[i,0]), float(res[i,1])]
-    dic_res['neck'] = [float((dic_res['left_shoulder'][0] + dic_res['right_shoulder'][0])/2), float((dic_res['left_shoulder'][1] + dic_res['right_shoulder'][1])/2)]
-    dic_res['hip'] = [float((dic_res['left_hip'][0] + dic_res['right_hip'][0])/2), float((dic_res['left_hip'][1] + dic_res['right_hip'][1])/2)]
+        dic_res[kpoints[i]] = [float(res[i, 0]), float(res[i, 1])]
+    dic_res['neck'] = [float((dic_res['left_shoulder'][0] + dic_res['right_shoulder'][0])/2),
+                       float((dic_res['left_shoulder'][1] + dic_res['right_shoulder'][1])/2)]
+    dic_res['hip'] = [float((dic_res['left_hip'][0] + dic_res['right_hip'][0])/2),
+                      float((dic_res['left_hip'][1] + dic_res['right_hip'][1])/2)]
     return dic_res
 
 
@@ -128,7 +132,8 @@ if __name__ == "__main__":
             logger.info(
                 "{}: {} in {:.2f}s".format(
                     path,
-                    "detected {} instances".format(len(predictions["instances"]))
+                    "detected {} instances".format(
+                        len(predictions["instances"]))
                     if "instances" in predictions
                     else "finished",
                     time.time() - start_time,
@@ -139,9 +144,11 @@ if __name__ == "__main__":
             if args.output:
                 if os.path.isdir(args.output):
                     assert os.path.isdir(args.output), args.output
-                    out_filename = os.path.join(args.output, os.path.basename(path))
+                    out_filename = os.path.join(
+                        args.output, os.path.basename(path))
                 else:
-                    assert len(args.input) == 1, "Please specify a directory with args.output"
+                    assert len(
+                        args.input) == 1, "Please specify a directory with args.output"
                     out_filename = args.output
                 if out_filename.endswith(".json"):
                     with open(out_filename, "w") as out_file:
@@ -150,7 +157,8 @@ if __name__ == "__main__":
                     visualized_output.save(out_filename)
             else:
                 cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
-                cv2.imshow(WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
+                cv2.imshow(
+                    WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
                 if cv2.waitKey(0) == 27:
                     break  # esc to quit
     elif args.webcam:
@@ -172,7 +180,8 @@ if __name__ == "__main__":
         num_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
         basename = os.path.basename(args.video_input)
         codec, file_ext = (
-            ("x264", ".mkv") if test_opencv_video_format("x264", ".mkv") else ("mp4v", ".mp4")
+            ("x264", ".mkv") if test_opencv_video_format(
+                "x264", ".mkv") else ("mp4v", ".mp4")
         )
         if codec == ".mp4v":
             warnings.warn("x264 codec not available, switching to mp4v")
