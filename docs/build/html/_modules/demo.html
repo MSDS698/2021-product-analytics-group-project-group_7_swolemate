@@ -1,0 +1,321 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>demo &#8212; Swolemate  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for demo</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) Facebook, Inc. and its affiliates.</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">tqdm</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="sd">&quot;&quot;&quot;from detectron2.config import get_cfg</span>
+<span class="sd">from detectron2.data.detection_utils import read_image</span>
+<span class="sd">from detectron2.utils.logger import setup_logger&quot;&quot;&quot;</span>
+
+<span class="c1">#from predictor import VisualizationDemo</span>
+
+<span class="c1"># constants</span>
+<span class="n">WINDOW_NAME</span> <span class="o">=</span> <span class="s2">&quot;COCO detections&quot;</span>
+
+
+<div class="viewcode-block" id="setup_cfg"><a class="viewcode-back" href="../demo.html#demo.setup_cfg">[docs]</a><span class="k">def</span> <span class="nf">setup_cfg</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="c1"># load config from file and command-line arguments</span>
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">get_cfg</span><span class="p">()</span>
+    <span class="c1"># To use demo for Panoptic-DeepLab, please uncomment the following two lines.</span>
+    <span class="c1"># from detectron2.projects.panoptic_deeplab import add_panoptic_deeplab_config  # noqa</span>
+    <span class="c1"># add_panoptic_deeplab_config(cfg)</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">merge_from_file</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">config_file</span><span class="p">)</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">merge_from_list</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">opts</span><span class="p">)</span>
+    <span class="c1"># Set score_threshold for builtin models</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">RETINANET</span><span class="o">.</span><span class="n">SCORE_THRESH_TEST</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">confidence_threshold</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">ROI_HEADS</span><span class="o">.</span><span class="n">SCORE_THRESH_TEST</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">confidence_threshold</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">MODEL</span><span class="o">.</span><span class="n">PANOPTIC_FPN</span><span class="o">.</span><span class="n">COMBINE</span><span class="o">.</span><span class="n">INSTANCES_CONFIDENCE_THRESH</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">confidence_threshold</span>
+    <span class="n">cfg</span><span class="o">.</span><span class="n">freeze</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">cfg</span></div>
+
+
+<div class="viewcode-block" id="get_parser"><a class="viewcode-back" href="../demo.html#demo.get_parser">[docs]</a><span class="k">def</span> <span class="nf">get_parser</span><span class="p">():</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Detectron2 demo for builtin configs&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--config-file&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;configs/quick_schedules/mask_rcnn_R_50_FPN_inference_acc_test.yaml&quot;</span><span class="p">,</span>
+        <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;FILE&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;path to config file&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--webcam&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Take inputs from webcam.&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--video-input&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to video file.&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--input&quot;</span><span class="p">,</span>
+        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;A list of space separated input images; &quot;</span>
+        <span class="s2">&quot;or a single glob pattern such as &#39;directory/*.jpg&#39;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--output&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;A file or directory to save output visualizations. &quot;</span>
+        <span class="s2">&quot;If not given, will show output in an OpenCV window.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--confidence-threshold&quot;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Minimum score for instance predictions to be shown&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--opts&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Modify config options using the command-line &#39;KEY VALUE&#39; pairs&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">nargs</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">REMAINDER</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">parser</span></div>
+
+
+<div class="viewcode-block" id="test_opencv_video_format"><a class="viewcode-back" href="../demo.html#demo.test_opencv_video_format">[docs]</a><span class="k">def</span> <span class="nf">test_opencv_video_format</span><span class="p">(</span><span class="n">codec</span><span class="p">,</span> <span class="n">file_ext</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;video_format_test&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">dir</span><span class="p">:</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="s2">&quot;test_file&quot;</span> <span class="o">+</span> <span class="n">file_ext</span><span class="p">)</span>
+        <span class="n">writer</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoWriter</span><span class="p">(</span>
+            <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+            <span class="n">fourcc</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">VideoWriter_fourcc</span><span class="p">(</span><span class="o">*</span><span class="n">codec</span><span class="p">),</span>
+            <span class="n">fps</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="mi">30</span><span class="p">),</span>
+            <span class="n">frameSize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+            <span class="n">isColor</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="p">[</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">30</span><span class="p">)]</span>
+        <span class="n">writer</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="get_kpoints"><a class="viewcode-back" href="../demo.html#demo.get_kpoints">[docs]</a><span class="k">def</span> <span class="nf">get_kpoints</span><span class="p">(</span><span class="n">predictions</span><span class="p">):</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="s1">&#39;instances&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">pred_keypoints</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">kpoints</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;nose&quot;</span><span class="p">,</span> <span class="s2">&quot;left_eye&quot;</span><span class="p">,</span> <span class="s2">&quot;right_eye&quot;</span><span class="p">,</span> <span class="s2">&quot;left_ear&quot;</span><span class="p">,</span> <span class="s2">&quot;right_ear&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;left_shoulder&quot;</span><span class="p">,</span> <span class="s2">&quot;right_shoulder&quot;</span><span class="p">,</span> <span class="s2">&quot;left_elbow&quot;</span><span class="p">,</span> <span class="s2">&quot;right_elbow&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;left_wrist&quot;</span><span class="p">,</span> <span class="s2">&quot;right_wrist&quot;</span><span class="p">,</span> <span class="s2">&quot;left_hip&quot;</span><span class="p">,</span> <span class="s2">&quot;right_hip&quot;</span><span class="p">,</span>
+               <span class="s2">&quot;left_knee&quot;</span><span class="p">,</span> <span class="s2">&quot;right_knee&quot;</span><span class="p">,</span> <span class="s2">&quot;left_ankle&quot;</span><span class="p">,</span> <span class="s2">&quot;right_ankle&quot;</span><span class="p">]</span>
+    <span class="n">dic_res</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">17</span><span class="p">):</span>
+        <span class="n">dic_res</span><span class="p">[</span><span class="n">kpoints</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="nb">float</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">])]</span>
+    <span class="n">dic_res</span><span class="p">[</span><span class="s1">&#39;neck&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">((</span><span class="n">dic_res</span><span class="p">[</span><span class="s1">&#39;left_shoulder&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dic_res</span><span class="p">[</span><span class="s1">&#39;right_shoulder&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+                       <span class="nb">float</span><span class="p">((</span><span class="n">dic_res</span><span class="p">[</span><span class="s1">&#39;left_shoulder&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dic_res</span><span class="p">[</span><span class="s1">&#39;right_shoulder&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">)]</span>
+    <span class="n">dic_res</span><span class="p">[</span><span class="s1">&#39;hip&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">((</span><span class="n">dic_res</span><span class="p">[</span><span class="s1">&#39;left_hip&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dic_res</span><span class="p">[</span><span class="s1">&#39;right_hip&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span>
+                      <span class="nb">float</span><span class="p">((</span><span class="n">dic_res</span><span class="p">[</span><span class="s1">&#39;left_hip&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dic_res</span><span class="p">[</span><span class="s1">&#39;right_hip&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">dic_res</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">mp</span><span class="o">.</span><span class="n">set_start_method</span><span class="p">(</span><span class="s2">&quot;spawn&quot;</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">get_parser</span><span class="p">()</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">setup_logger</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;fvcore&quot;</span><span class="p">)</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">setup_logger</span><span class="p">()</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Arguments: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
+
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">setup_cfg</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="n">demo</span> <span class="o">=</span> <span class="n">VisualizationDemo</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">input</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">input</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">input</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">input</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="k">assert</span> <span class="n">args</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="s2">&quot;The input path(s) was not found&quot;</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">):</span>
+            <span class="c1"># use PIL, to be consistent with evaluation</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">read_image</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;BGR&quot;</span><span class="p">)</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="n">predictions</span><span class="p">,</span> <span class="n">visualized_output</span> <span class="o">=</span> <span class="n">demo</span><span class="o">.</span><span class="n">run_on_image</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">: </span><span class="si">{}</span><span class="s2"> in </span><span class="si">{:.2f}</span><span class="s2">s&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">path</span><span class="p">,</span>
+                    <span class="s2">&quot;detected </span><span class="si">{}</span><span class="s2"> instances&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="s2">&quot;instances&quot;</span><span class="p">]))</span>
+                    <span class="k">if</span> <span class="s2">&quot;instances&quot;</span> <span class="ow">in</span> <span class="n">predictions</span>
+                    <span class="k">else</span> <span class="s2">&quot;finished&quot;</span><span class="p">,</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">dic_res</span> <span class="o">=</span> <span class="n">get_kpoints</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">):</span>
+                    <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">),</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span>
+                    <span class="n">out_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span>
+                        <span class="n">args</span><span class="o">.</span><span class="n">input</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Please specify a directory with args.output&quot;</span>
+                    <span class="n">out_filename</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span>
+                <span class="k">if</span> <span class="n">out_filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.json&quot;</span><span class="p">):</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">out_filename</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">out_file</span><span class="p">:</span>
+                        <span class="n">out_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">dic_res</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">visualized_output</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">out_filename</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cv2</span><span class="o">.</span><span class="n">namedWindow</span><span class="p">(</span><span class="n">WINDOW_NAME</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">WINDOW_NORMAL</span><span class="p">)</span>
+                <span class="n">cv2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+                    <span class="n">WINDOW_NAME</span><span class="p">,</span> <span class="n">visualized_output</span><span class="o">.</span><span class="n">get_image</span><span class="p">()[:,</span> <span class="p">:,</span> <span class="p">::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">cv2</span><span class="o">.</span><span class="n">waitKey</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">27</span><span class="p">:</span>
+                    <span class="k">break</span>  <span class="c1"># esc to quit</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">webcam</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">args</span><span class="o">.</span><span class="n">input</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Cannot have both --input and --webcam!&quot;</span>
+        <span class="k">assert</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;output not yet supported with --webcam!&quot;</span>
+        <span class="n">cam</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">vis</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">demo</span><span class="o">.</span><span class="n">run_on_video</span><span class="p">(</span><span class="n">cam</span><span class="p">)):</span>
+            <span class="n">cv2</span><span class="o">.</span><span class="n">namedWindow</span><span class="p">(</span><span class="n">WINDOW_NAME</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">WINDOW_NORMAL</span><span class="p">)</span>
+            <span class="n">cv2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">WINDOW_NAME</span><span class="p">,</span> <span class="n">vis</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cv2</span><span class="o">.</span><span class="n">waitKey</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">27</span><span class="p">:</span>
+                <span class="k">break</span>  <span class="c1"># esc to quit</span>
+        <span class="n">cam</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+        <span class="n">cv2</span><span class="o">.</span><span class="n">destroyAllWindows</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">video_input</span><span class="p">:</span>
+        <span class="n">video</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">video_input</span><span class="p">)</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">video</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_WIDTH</span><span class="p">))</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">video</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_HEIGHT</span><span class="p">))</span>
+        <span class="n">frames_per_second</span> <span class="o">=</span> <span class="n">video</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FPS</span><span class="p">)</span>
+        <span class="n">num_frames</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">video</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">CAP_PROP_FRAME_COUNT</span><span class="p">))</span>
+        <span class="n">basename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">video_input</span><span class="p">)</span>
+        <span class="n">codec</span><span class="p">,</span> <span class="n">file_ext</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;x264&quot;</span><span class="p">,</span> <span class="s2">&quot;.mkv&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">test_opencv_video_format</span><span class="p">(</span>
+                <span class="s2">&quot;x264&quot;</span><span class="p">,</span> <span class="s2">&quot;.mkv&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="s2">&quot;mp4v&quot;</span><span class="p">,</span> <span class="s2">&quot;.mp4&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">codec</span> <span class="o">==</span> <span class="s2">&quot;.mp4v&quot;</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;x264 codec not available, switching to mp4v&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">):</span>
+                <span class="n">output_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">,</span> <span class="n">basename</span><span class="p">)</span>
+                <span class="n">output_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">output_fname</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">file_ext</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">output_fname</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">output_fname</span><span class="p">),</span> <span class="n">output_fname</span>
+            <span class="n">output_file</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoWriter</span><span class="p">(</span>
+                <span class="n">filename</span><span class="o">=</span><span class="n">output_fname</span><span class="p">,</span>
+                <span class="c1"># some installation of opencv may not support x264 (due to its license),</span>
+                <span class="c1"># you can try other format (e.g. MPEG)</span>
+                <span class="n">fourcc</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">VideoWriter_fourcc</span><span class="p">(</span><span class="o">*</span><span class="n">codec</span><span class="p">),</span>
+                <span class="n">fps</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">frames_per_second</span><span class="p">),</span>
+                <span class="n">frameSize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">),</span>
+                <span class="n">isColor</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">assert</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">video_input</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">vis_frame</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="n">demo</span><span class="o">.</span><span class="n">run_on_video</span><span class="p">(</span><span class="n">video</span><span class="p">),</span> <span class="n">total</span><span class="o">=</span><span class="n">num_frames</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">:</span>
+                <span class="n">output_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">vis_frame</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cv2</span><span class="o">.</span><span class="n">namedWindow</span><span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">cv2</span><span class="o">.</span><span class="n">WINDOW_NORMAL</span><span class="p">)</span>
+                <span class="n">cv2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">basename</span><span class="p">,</span> <span class="n">vis_frame</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">cv2</span><span class="o">.</span><span class="n">waitKey</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">27</span><span class="p">:</span>
+                    <span class="k">break</span>  <span class="c1"># esc to quit</span>
+        <span class="n">video</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">output</span><span class="p">:</span>
+            <span class="n">output_file</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cv2</span><span class="o">.</span><span class="n">destroyAllWindows</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Swolemate</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../code.html">Auto Generated Code Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../code.html#module-demo">demo module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Bolian Liu, Daniel Carrera, Elyse Cheung-Sutton, Kris Johnson, Kexin Wang, Moh Kaddoura, Suren Gunturu, Wenyao Zhang.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
