@@ -13,6 +13,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../../swolemate_flask/app/'))
+sys.path.insert(0, os.path.abspath('../../detectron2docker/'))
 
 
 # -- Project information -----------------------------------------------------
