@@ -39,42 +39,45 @@
 <span class="kn">import</span> <span class="nn">os</span>
 
 
-<div class="viewcode-block" id="UploadFileForm"><a class="viewcode-back" href="../../app.html#app.routes_2.UploadFileForm">[docs]</a><span class="k">class</span> <span class="nc">UploadFileForm</span><span class="p">(</span><span class="n">FlaskForm</span><span class="p">):</span>
+<div class="viewcode-block" id="UploadFileForm"><a class="viewcode-back" href="../../code.html#app.routes_2.UploadFileForm">[docs]</a><span class="k">class</span> <span class="nc">UploadFileForm</span><span class="p">(</span><span class="n">FlaskForm</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class for uploading file when submitted&quot;&quot;&quot;</span>
     <span class="n">file_selector</span> <span class="o">=</span> <span class="n">FileField</span><span class="p">(</span><span class="s1">&#39;File&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">FileRequired</span><span class="p">()])</span>
     <span class="n">submit</span> <span class="o">=</span> <span class="n">SubmitField</span><span class="p">(</span><span class="s1">&#39;Submit&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="index"><a class="viewcode-back" href="../../app.html#app.routes_2.index">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/index&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="index"><a class="viewcode-back" href="../../code.html#app.routes_2.index">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/index&#39;</span><span class="p">)</span>
 <span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Index Page : Renders index.html with author name.&quot;&quot;&quot;</span>
-    <span class="c1">#return (&quot;&lt;h1&gt; Hello World &lt;/h1&gt;&quot;)</span>
-    <span class="n">images</span><span class="o">=</span><span class="p">[{</span><span class="s1">&#39;text&#39;</span><span class="p">:</span><span class="s1">&#39;Good Form&#39;</span><span class="p">,</span> <span class="s1">&#39;image&#39;</span><span class="p">:</span><span class="s1">&#39;https://images.pexels.com/photos/176782/pexels-photo-176782.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=1&amp;w=500&#39;</span><span class="p">},</span>
-            <span class="p">{</span><span class="s1">&#39;text&#39;</span><span class="p">:</span><span class="s1">&#39;User Input&#39;</span><span class="p">,</span> <span class="s1">&#39;image&#39;</span><span class="p">:</span><span class="s1">&#39;https://images.pexels.com/photos/176782/pexels-photo-176782.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=1&amp;w=500&#39;</span><span class="p">}]</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span><span class="n">images</span><span class="o">=</span><span class="n">images</span><span class="p">))</span></div>
+    <span class="c1"># return (&quot;&lt;h1&gt; Hello World &lt;/h1&gt;&quot;)</span>
+    <span class="n">images</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="s1">&#39;Good Form&#39;</span><span class="p">,</span> <span class="s1">&#39;image&#39;</span><span class="p">:</span> <span class="s1">&#39;https://images.pexels.com/photos/176782/pexels-photo-176782.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=1&amp;w=500&#39;</span><span class="p">},</span>
+              <span class="p">{</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="s1">&#39;User Input&#39;</span><span class="p">,</span> <span class="s1">&#39;image&#39;</span><span class="p">:</span> <span class="s1">&#39;https://images.pexels.com/photos/176782/pexels-photo-176782.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=1&amp;w=500&#39;</span><span class="p">}]</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">images</span><span class="o">=</span><span class="n">images</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="team"><a class="viewcode-back" href="../../app.html#app.routes_2.team">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/team&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="team"><a class="viewcode-back" href="../../code.html#app.routes_2.team">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/team&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">team</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Index Page : Renders index.html with author name.&quot;&quot;&quot;</span>
-    <span class="c1">#return (&quot;&lt;h1&gt; Hello World &lt;/h1&gt;&quot;)</span>
-    <span class="n">authors</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Boliang Liu&#39;</span><span class="p">,</span><span class="s1">&#39;Daniel Carrera&#39;</span><span class="p">,</span><span class="s1">&#39;Elyse Cheung-Sutton&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;Kris Johnson&#39;</span><span class="p">,</span><span class="s1">&#39;Kexin Wang&#39;</span><span class="p">,</span><span class="s1">&#39;Moh Kaddoura&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;Suren Gunturu&#39;</span><span class="p">,</span><span class="s1">&#39;Wenyao Zhang&#39;</span><span class="p">]</span>
+    <span class="c1"># return (&quot;&lt;h1&gt; Hello World &lt;/h1&gt;&quot;)</span>
+    <span class="n">authors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Boliang Liu&#39;</span><span class="p">,</span> <span class="s1">&#39;Daniel Carrera&#39;</span><span class="p">,</span> <span class="s1">&#39;Elyse Cheung-Sutton&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;Kris Johnson&#39;</span><span class="p">,</span> <span class="s1">&#39;Kexin Wang&#39;</span><span class="p">,</span> <span class="s1">&#39;Moh Kaddoura&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;Suren Gunturu&#39;</span><span class="p">,</span> <span class="s1">&#39;Wenyao Zhang&#39;</span><span class="p">]</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;team.html&#39;</span><span class="p">,</span> <span class="n">authors</span><span class="o">=</span><span class="n">authors</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="upload"><a class="viewcode-back" href="../../app.html#app.routes_2.upload">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/upload&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="upload"><a class="viewcode-back" href="../../code.html#app.routes_2.upload">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/upload&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
 <span class="k">def</span> <span class="nf">upload</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;upload a file from a client machine.&quot;&quot;&quot;</span>
     <span class="n">file</span> <span class="o">=</span> <span class="n">UploadFileForm</span><span class="p">()</span>  <span class="c1"># file : UploadFileForm class instance</span>
-    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>  <span class="c1"># Check if it is a POST request and if it is valid.</span>
+    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>  <span class="c1"># Check it&#39;s a POST request that&#39;s valid</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">file_selector</span><span class="o">.</span><span class="n">data</span>  <span class="c1"># f : Data of FileField</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">filename</span>
         <span class="c1"># filename : filename of FileField</span>
 
         <span class="n">file_dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">application</span><span class="o">.</span><span class="n">instance_path</span><span class="p">,</span> <span class="s1">&#39;files&#39;</span><span class="p">)</span>
         <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_dir_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span> <span class="c1"># Save file to file_path (instance/ + &#39;files’ + filename)</span>
+        <span class="c1"># Save file to file_path (instance/ + &#39;files’ + filename)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">))</span>  <span class="c1"># Redirect to / (/index) page.</span>
     <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;upload.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">file</span><span class="p">)</span></div>
@@ -101,6 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../code.html">Auto Generated Code Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code.html#demo-module">demo module</a></li>
 </ul>
 
 <div class="relations">

@@ -12,7 +12,6 @@
 #
 import os
 import sys
-#sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('../../swolemate_flask/code/'))
 sys.path.insert(0, os.path.abspath('../../detectron2docker/'))
 
@@ -20,8 +19,13 @@ sys.path.insert(0, os.path.abspath('../../detectron2docker/'))
 # -- Project information -----------------------------------------------------
 
 project = 'Swolemate'
-copyright = '2021, Bolian Liu, Daniel Carrera, Elyse Cheung-Sutton, Kris Johnson, Kexin Wang, Moh Kaddoura, Suren Gunturu, Wenyao Zhang'
-author = 'Bolian Liu, Daniel Carrera, Elyse Cheung-Sutton, Kris Johnson, Kexin Wang, Moh Kaddoura, Suren Gunturu, Wenyao Zhang'
+copyright = '2021, Bolian Liu, Daniel Carrera, Elyse Cheung-Sutton, ' \
+            'Kris Johnson, ' \
+            'Kexin Wang, Moh Kaddoura, ' \
+            'Suren Gunturu, Wenyao Zhang'
+author = 'Bolian Liu, Daniel Carrera, Elyse Cheung-Sutton, ' \
+         'Kris Johnson, Kexin Wang, ' \
+         'Moh Kaddoura, Suren Gunturu, Wenyao Zhang'
 
 
 # -- General configuration ---------------------------------------------------
@@ -29,8 +33,7 @@ author = 'Bolian Liu, Daniel Carrera, Elyse Cheung-Sutton, Kris Johnson, Kexin W
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode'
-]
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
