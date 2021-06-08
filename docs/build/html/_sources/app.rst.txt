@@ -4,14 +4,6 @@ app package
 Submodules
 ----------
 
-app.routes module
------------------
-
-.. automodule:: app.routes
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 app.routes\_2 module
 --------------------
 

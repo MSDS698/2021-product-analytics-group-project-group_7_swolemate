@@ -16,7 +16,9 @@ Welcome to Swolemate's documentation!
 
 Introduction
 ---------------------------------------
-This is the documentation section for Swolemate. We will be using sample images of exercises and taking a similarity score with the correct form of that exercise and outputting the similarity/feedback to the user. 
+Swolemate is an app that brings expert fitness training to consumers wherever they are. Our technology guides users through different exercise routines led by professional coaches and then provides feedback on their performance. Using artificial intelligence, we can evaluate the movements and body positioning of users, ensuring that each exercise is executed correctly and safely.
+
+This app is available to individuals who want to work out in the comfort of their homes and gyms who want to provide their members with the latest technology and a more affordable alternative to one-on-one human coaching.
 
 
 

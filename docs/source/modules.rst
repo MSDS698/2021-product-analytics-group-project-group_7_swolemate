@@ -1,7 +1,8 @@
-detectron2docker
-================
+code
+====
 
 .. toctree::
    :maxdepth: 4
 
-   demo
+   app
+   application
