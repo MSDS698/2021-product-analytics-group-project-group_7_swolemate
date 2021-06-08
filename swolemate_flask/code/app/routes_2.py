@@ -4,6 +4,27 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from wtforms import SubmitField
 import os
+import boto3
+
+
+# S3 Upload Stuff
+def upload_file_to_s3(file, bucket_name, acl="public-read"):
+
+    try:
+        s3.upload_fileobj(
+            file,
+            bucket_name,
+            file.filename,
+            ExtraArgs={
+                "ACL": acl,
+                "ContentType": file.content_type
+            }
+        )
+
+    except Exception as e:
+        # This is a catch all exception, edit this part to fit your needs.
+        print("Something Happened: ", e)
+        return e
 
 
 class UploadFileForm(FlaskForm):
@@ -16,7 +37,6 @@ class UploadFileForm(FlaskForm):
 @application.route('/')
 def index():
     """Index Page : Renders index.html with author name."""
-    # return ("<h1> Hello World </h1>")
     images = [{'text': 'Good Form', 'image': 'https://images.pexels.com/photos/176782/pexels-photo-176782.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500'},
               {'text': 'User Input', 'image': 'https://images.pexels.com/photos/176782/pexels-photo-176782.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500'}]
     return (render_template('index.html', images=images))
@@ -34,17 +54,26 @@ def team():
 
 @application.route('/upload', methods=['GET', 'POST'])
 def upload():
+    bucket_name = "msds603-swolemate-s3"
+    aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
+    aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    # print(aws_access_key_id)
+    # print(aws_secret_access_key)
+
     """upload a file from a client machine."""
     file = UploadFileForm()  # file : UploadFileForm class instance
     if file.validate_on_submit():  # Check it's a POST request that's valid
         f = file.file_selector.data  # f : Data of FileField
         filename = f.filename
-        # filename : filename of FileField
 
-        file_dir_path = os.path.join(application.instance_path, 'files')
-        file_path = os.path.join(file_dir_path, filename)
-        # Save file to file_path (instance/ + 'files’ + filename)
-        f.save(file_path)
+        session = boto3.Session(
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret_access_key
+                )
+
+        session.resource("s3")\
+            .Bucket(bucket_name)\
+            .put_object(Key=filename, Body=f, ACL='public-read-write')
 
         return redirect(url_for('index'))  # Redirect to / (/index) page.
     return render_template('upload.html', form=file)
