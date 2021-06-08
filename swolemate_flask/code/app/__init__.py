@@ -2,9 +2,9 @@ from flask import Flask
 import os
 
 # Initialization
-# Create an application instance (an object of class Flask)  which handles all requests.
+# Create an application instance, handles all requests.
 application = Flask(__name__)
 application.secret_key = os.urandom(24)
 
-from app import routes_2 # routes.py needs to import "application" variable in __init__.py (Altough it violates PEP8 standards)
-
+# routes.py needs to import "application" variable in __init__.py - breaks PEP8
+from app import routes_2
