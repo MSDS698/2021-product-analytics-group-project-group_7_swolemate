@@ -1,0 +1,14 @@
+version: "3"
+services:
+  web:
+    image: kjohnson23/swole_frontend
+    ports:
+      - "80:5000"
+    container_name: web
+    networks:
+      - default
+      - swole_net
+
+networks:
+   swole_net:
+
