@@ -106,6 +106,20 @@ def get_kpoints(predictions):
     return dic_res
 
 
+def get_videoframe_kpoints(predictions):
+    res = predictions.pred_keypoints.cpu().detach().numpy()[0]
+    kpoints = [ "nose", "left_eye", "right_eye", "left_ear", "right_ear",
+               "left_shoulder", "right_shoulder", "left_elbow", "right_elbow",
+               "left_wrist", "right_wrist", "left_hip", "right_hip",
+               "left_knee", "right_knee", "left_ankle", "right_ankle" ]
+    dic_res = {}
+    for i in range(17):
+        dic_res[kpoints[i]] = [float(res[i,0]), float(res[i,1])]
+    dic_res['neck'] = [float((dic_res['left_shoulder'][0] + dic_res['right_shoulder'][0])/2), float((dic_res['left_shoulder'][1] + dic_res['right_shoulder'][1])/2)]
+    dic_res['hip'] = [float((dic_res['left_hip'][0] + dic_res['right_hip'][0])/2), float((dic_res['left_hip'][1] + dic_res['right_hip'][1])/2)]
+    return dic_res
+
+
 if __name__ == "__main__":
     mp.set_start_method("spawn", force=True)
     args = get_parser().parse_args()
@@ -189,17 +203,30 @@ if __name__ == "__main__":
             else:
                 output_fname = args.output
             assert not os.path.isfile(output_fname), output_fname
-            output_file = cv2.VideoWriter(
-                filename=output_fname,
-                fourcc=cv2.VideoWriter_fourcc(*codec),
-                fps=float(frames_per_second),
-                frameSize=(width, height),
-                isColor=True,
-            )
+
+            json_output = False
+            if output_fname.endswith(".json"):
+                json_output = True
+
+            if not json_output:
+                output_file = cv2.VideoWriter(
+                    filename=output_fname,
+                    # some installation of opencv may not support x264 (due to its license),
+                    # you can try other format (e.g. MPEG)
+                    fourcc=cv2.VideoWriter_fourcc(*codec),
+                    fps=float(frames_per_second),
+                    frameSize=(width, height),
+                    isColor=True,
+                )
         assert os.path.isfile(args.video_input)
-        for vis_frame in tqdm.tqdm(demo.run_on_video(video), total=num_frames):
+
+        predictions_array = []
+        for vis_frame, predictions in tqdm.tqdm(demo.run_on_video(video), total=num_frames):
             if args.output:
-                output_file.write(vis_frame)
+                if json_output:
+                    predictions_array.append(get_videoframe_kpoints(predictions))
+                else:
+                    output_file.write(vis_frame)
             else:
                 cv2.namedWindow(basename, cv2.WINDOW_NORMAL)
                 cv2.imshow(basename, vis_frame)
@@ -207,6 +234,10 @@ if __name__ == "__main__":
                     break  # esc to quit
         video.release()
         if args.output:
-            output_file.release()
+            if json_output:
+                with open(output_fname, "w") as out_file:
+                    out_file.write(json.dumps(predictions_array))
+            else:
+                output_file.release()
         else:
             cv2.destroyAllWindows()

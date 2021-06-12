@@ -30,6 +30,7 @@ RUN pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/c
 WORKDIR /home/appuser/detectron2_repo
 
 COPY demo.py demo/demo.py
+COPY predictor.py demo/predictor.py
 
 # Set a fixed model cache directory.
 ENV FVCORE_CACHE="/tmp"
