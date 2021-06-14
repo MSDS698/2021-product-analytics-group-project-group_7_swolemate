@@ -33,11 +33,13 @@ def upload():
     bucket_name = "msds603-swolemate-s3"
     aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    # s3_location = 'http://{}.s3.amazonaws.com/'.format(bucket_name)
+    s3_location = 'https://s3.console.aws.amazon.com/s3/buckets/msds603-swolemate-s3'
     # print(aws_access_key_id)
     # print(aws_secret_access_key)
 
     """upload a file from a client machine."""
-    file = UploadFileForm()  # file : UploadFileForm class instance
+    file = classes.UploadFileForm()  # file : UploadFileForm class instance
     if file.validate_on_submit():  # Check it's a POST request that's valid
         f = file.file_selector.data  # f : Data of FileField
         filename = f.filename
@@ -50,6 +52,9 @@ def upload():
         session.resource("s3")\
             .Bucket(bucket_name)\
             .put_object(Key=filename, Body=f, ACL='public-read-write')
+
+        uploaded_file = 'https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
+        print(uploaded_file)
 
         return redirect(url_for('index'))  # Redirect to / (/index) page.
     return render_template('upload.html', form=file)
@@ -108,3 +113,8 @@ def logout():
                    + str(current_user.is_authenticated) + '</h1>'
     return before_logout + after_logout
 
+@application.route('/userpage')
+def userpage():
+    # Show Shiqi vid
+    # Graph hip points
+    ...
