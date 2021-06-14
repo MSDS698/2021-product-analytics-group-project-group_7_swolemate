@@ -56,7 +56,7 @@ def upload():
         uploaded_file = 'https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
         print(uploaded_file)
 
-        return redirect(url_for('index'))  # Redirect to / (/index) page.
+        return redirect(url_for('userpage'))  # Redirect to / (/index) page.
     return render_template('upload.html', form=file)
 
 
@@ -96,7 +96,8 @@ def login():
         # Login and validate the user.
         if user is not None and user.check_password(password):
             login_user(user)
-            return("<h1> Welcome {}!</h1>".format(username))
+            return redirect(url_for('userpage'))
+            # return("<h1> Welcome {}!</h1>".format(username))
 
     return render_template('login.html', form=login_form)
 
@@ -116,5 +117,6 @@ def logout():
 @application.route('/userpage')
 def userpage():
     # Show Shiqi vid
+
     # Graph hip points
-    ...
+    return render_template('userpage.html')
