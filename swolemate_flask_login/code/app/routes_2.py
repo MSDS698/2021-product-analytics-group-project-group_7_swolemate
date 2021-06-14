@@ -8,31 +8,6 @@ import boto3
 
 from flask_login import current_user, login_user, login_required, logout_user
 
-# S3 Upload Stuff
-def upload_file_to_s3(file, bucket_name, acl="public-read"):
-
-    try:
-        s3.upload_fileobj(
-            file,
-            bucket_name,
-            file.filename,
-            ExtraArgs={
-                "ACL": acl,
-                "ContentType": file.content_type
-            }
-        )
-
-    except Exception as e:
-        # This is a catch all exception, edit this part to fit your needs.
-        print("Something Happened: ", e)
-        return e
-
-
-class UploadFileForm(FlaskForm):
-    """Class for uploading file when submitted"""
-    file_selector = FileField('File', validators=[FileRequired()])
-    submit = SubmitField('Submit')
-
 
 @application.route('/index')
 @application.route('/')

@@ -4,8 +4,34 @@ from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 from wtforms import PasswordField, StringField, SubmitField
 from wtforms.validators import DataRequired
+from flask_wtf.file import FileField, FileRequired
 
 from app import db, login_manager
+
+# S3 Upload
+def upload_file_to_s3(file, bucket_name, acl="public-read"):
+
+    try:
+        s3.upload_fileobj(
+            file,
+            bucket_name,
+            file.filename,
+            ExtraArgs={
+                "ACL": acl,
+                "ContentType": file.content_type
+            }
+        )
+
+    except Exception as e:
+        # This is a catch all exception, edit this part to fit your needs.
+        print("Something Happened: ", e)
+        return e
+
+
+class UploadFileForm(FlaskForm):
+    """Class for uploading file when submitted"""
+    file_selector = FileField('File', validators=[FileRequired()])
+    submit = SubmitField('Submit')
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
