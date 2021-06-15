@@ -1,10 +1,12 @@
 from app import application, classes, db
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, Response
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from wtforms import SubmitField
 import os
 import boto3
+import io
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from flask_login import current_user, login_user, login_required, logout_user
 
@@ -114,6 +116,14 @@ def logout():
                    + str(current_user.is_authenticated) + '</h1>'
     return before_logout + after_logout
 
+@application.route('/plot.png')
+def plot_png():
+    fig = classes.create_figure()
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
+
+    
 @application.route('/userpage')
 def userpage():
     # Show Shiqi vid
