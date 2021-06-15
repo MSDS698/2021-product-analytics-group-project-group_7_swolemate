@@ -1,37 +1,14 @@
 from app import application, classes, db
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, Response
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from wtforms import SubmitField
 import os
 import boto3
+import io
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from flask_login import current_user, login_user, login_required, logout_user
-
-# S3 Upload Stuff
-def upload_file_to_s3(file, bucket_name, acl="public-read"):
-
-    try:
-        s3.upload_fileobj(
-            file,
-            bucket_name,
-            file.filename,
-            ExtraArgs={
-                "ACL": acl,
-                "ContentType": file.content_type
-            }
-        )
-
-    except Exception as e:
-        # This is a catch all exception, edit this part to fit your needs.
-        print("Something Happened: ", e)
-        return e
-
-
-class UploadFileForm(FlaskForm):
-    """Class for uploading file when submitted"""
-    file_selector = FileField('File', validators=[FileRequired()])
-    submit = SubmitField('Submit')
 
 
 @application.route('/index')
@@ -58,11 +35,13 @@ def upload():
     bucket_name = "msds603-swolemate-s3"
     aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    # s3_location = 'http://{}.s3.amazonaws.com/'.format(bucket_name)
+    s3_location = 'https://s3.console.aws.amazon.com/s3/buckets/msds603-swolemate-s3'
     # print(aws_access_key_id)
     # print(aws_secret_access_key)
 
     """upload a file from a client machine."""
-    file = UploadFileForm()  # file : UploadFileForm class instance
+    file = classes.UploadFileForm()  # file : UploadFileForm class instance
     if file.validate_on_submit():  # Check it's a POST request that's valid
         f = file.file_selector.data  # f : Data of FileField
         filename = f.filename
@@ -76,7 +55,10 @@ def upload():
             .Bucket(bucket_name)\
             .put_object(Key=filename, Body=f, ACL='public-read-write')
 
-        return redirect(url_for('index'))  # Redirect to / (/index) page.
+        uploaded_file = 'https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
+        print(uploaded_file)
+
+        return redirect(url_for('userpage'))  # Redirect to / (/index) page.
     return render_template('upload.html', form=file)
 
 
@@ -116,7 +98,8 @@ def login():
         # Login and validate the user.
         if user is not None and user.check_password(password):
             login_user(user)
-            return("<h1> Welcome {}!</h1>".format(username))
+            return redirect(url_for('userpage'))
+            # return("<h1> Welcome {}!</h1>".format(username))
 
     return render_template('login.html', form=login_form)
 
@@ -133,3 +116,17 @@ def logout():
                    + str(current_user.is_authenticated) + '</h1>'
     return before_logout + after_logout
 
+@application.route('/plot.png')
+def plot_png():
+    fig = classes.create_figure()
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
+
+    
+@application.route('/userpage')
+def userpage():
+    # Show Shiqi vid
+
+    # Graph hip points
+    return render_template('userpage.html')
