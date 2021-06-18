@@ -36,6 +36,7 @@ Requirements
 | jmespath==0.10.0
 | jsonschema==3.2.0
 | MarkupSafe==2.0.1
+| matplotlib==3.4.2
 | numpy==1.20.3
 | opencv-python==4.5.2.52
 | packaging==20.9

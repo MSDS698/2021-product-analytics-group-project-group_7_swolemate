@@ -32,39 +32,16 @@
             
   <h1>Source code for app.routes_2</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">application</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">db</span>
-<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">url_for</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">url_for</span><span class="p">,</span> <span class="n">Response</span>
 <span class="kn">from</span> <span class="nn">flask_wtf</span> <span class="kn">import</span> <span class="n">FlaskForm</span>
 <span class="kn">from</span> <span class="nn">flask_wtf.file</span> <span class="kn">import</span> <span class="n">FileField</span><span class="p">,</span> <span class="n">FileRequired</span>
 <span class="kn">from</span> <span class="nn">wtforms</span> <span class="kn">import</span> <span class="n">SubmitField</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">boto3</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_agg</span> <span class="kn">import</span> <span class="n">FigureCanvasAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
 
 <span class="kn">from</span> <span class="nn">flask_login</span> <span class="kn">import</span> <span class="n">current_user</span><span class="p">,</span> <span class="n">login_user</span><span class="p">,</span> <span class="n">login_required</span><span class="p">,</span> <span class="n">logout_user</span>
-
-<span class="c1"># S3 Upload Stuff</span>
-<div class="viewcode-block" id="upload_file_to_s3"><a class="viewcode-back" href="../../code.html#app.routes_2.upload_file_to_s3">[docs]</a><span class="k">def</span> <span class="nf">upload_file_to_s3</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">acl</span><span class="o">=</span><span class="s2">&quot;public-read&quot;</span><span class="p">):</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">s3</span><span class="o">.</span><span class="n">upload_fileobj</span><span class="p">(</span>
-            <span class="n">file</span><span class="p">,</span>
-            <span class="n">bucket_name</span><span class="p">,</span>
-            <span class="n">file</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
-            <span class="n">ExtraArgs</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;ACL&quot;</span><span class="p">:</span> <span class="n">acl</span><span class="p">,</span>
-                <span class="s2">&quot;ContentType&quot;</span><span class="p">:</span> <span class="n">file</span><span class="o">.</span><span class="n">content_type</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
-
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="c1"># This is a catch all exception, edit this part to fit your needs.</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Something Happened: &quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">e</span></div>
-
-
-<div class="viewcode-block" id="UploadFileForm"><a class="viewcode-back" href="../../code.html#app.routes_2.UploadFileForm">[docs]</a><span class="k">class</span> <span class="nc">UploadFileForm</span><span class="p">(</span><span class="n">FlaskForm</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class for uploading file when submitted&quot;&quot;&quot;</span>
-    <span class="n">file_selector</span> <span class="o">=</span> <span class="n">FileField</span><span class="p">(</span><span class="s1">&#39;File&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">FileRequired</span><span class="p">()])</span>
-    <span class="n">submit</span> <span class="o">=</span> <span class="n">SubmitField</span><span class="p">(</span><span class="s1">&#39;Submit&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="index"><a class="viewcode-back" href="../../code.html#app.routes_2.index">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/index&#39;</span><span class="p">)</span>
@@ -91,11 +68,13 @@
     <span class="n">bucket_name</span> <span class="o">=</span> <span class="s2">&quot;msds603-swolemate-s3&quot;</span>
     <span class="n">aws_access_key_id</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;AWS_ACCESS_KEY_ID&#39;</span><span class="p">)</span>
     <span class="n">aws_secret_access_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;AWS_SECRET_ACCESS_KEY&#39;</span><span class="p">)</span>
+    <span class="c1"># s3_location = &#39;http://{}.s3.amazonaws.com/&#39;.format(bucket_name)</span>
+    <span class="n">s3_location</span> <span class="o">=</span> <span class="s1">&#39;https://s3.console.aws.amazon.com/s3/buckets/msds603-swolemate-s3&#39;</span>
     <span class="c1"># print(aws_access_key_id)</span>
     <span class="c1"># print(aws_secret_access_key)</span>
 
     <span class="sd">&quot;&quot;&quot;upload a file from a client machine.&quot;&quot;&quot;</span>
-    <span class="n">file</span> <span class="o">=</span> <span class="n">UploadFileForm</span><span class="p">()</span>  <span class="c1"># file : UploadFileForm class instance</span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">UploadFileForm</span><span class="p">()</span>  <span class="c1"># file : UploadFileForm class instance</span>
     <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>  <span class="c1"># Check it&#39;s a POST request that&#39;s valid</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">file_selector</span><span class="o">.</span><span class="n">data</span>  <span class="c1"># f : Data of FileField</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">filename</span>
@@ -109,7 +88,10 @@
             <span class="o">.</span><span class="n">Bucket</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">)</span>\
             <span class="o">.</span><span class="n">put_object</span><span class="p">(</span><span class="n">Key</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">Body</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">ACL</span><span class="o">=</span><span class="s1">&#39;public-read-write&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">))</span>  <span class="c1"># Redirect to / (/index) page.</span>
+        <span class="n">uploaded_file</span> <span class="o">=</span> <span class="s1">&#39;https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/&#39;</span> <span class="o">+</span> <span class="n">filename</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">uploaded_file</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;userpage&#39;</span><span class="p">))</span>  <span class="c1"># Redirect to / (/index) page.</span>
     <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;upload.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">file</span><span class="p">)</span></div>
 
 
@@ -149,7 +131,8 @@
         <span class="c1"># Login and validate the user.</span>
         <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">user</span><span class="o">.</span><span class="n">check_password</span><span class="p">(</span><span class="n">password</span><span class="p">):</span>
             <span class="n">login_user</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-            <span class="k">return</span><span class="p">(</span><span class="s2">&quot;&lt;h1&gt; Welcome </span><span class="si">{}</span><span class="s2">!&lt;/h1&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">username</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;userpage&#39;</span><span class="p">))</span>
+            <span class="c1"># return(&quot;&lt;h1&gt; Welcome {}!&lt;/h1&gt;&quot;.format(username))</span>
 
     <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;login.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">login_form</span><span class="p">)</span></div>
 
@@ -166,6 +149,20 @@
                    <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&lt;/h1&gt;&#39;</span>
     <span class="k">return</span> <span class="n">before_logout</span> <span class="o">+</span> <span class="n">after_logout</span></div>
 
+<div class="viewcode-block" id="plot_png"><a class="viewcode-back" href="../../code.html#app.routes_2.plot_png">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/plot.png&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">plot_png</span><span class="p">():</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">create_figure</span><span class="p">()</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
+    <span class="n">FigureCanvas</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span><span class="o">.</span><span class="n">print_png</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">getvalue</span><span class="p">(),</span> <span class="n">mimetype</span><span class="o">=</span><span class="s1">&#39;image/png&#39;</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="userpage"><a class="viewcode-back" href="../../code.html#app.routes_2.userpage">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/userpage&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">userpage</span><span class="p">():</span>
+    <span class="c1"># Show Shiqi vid</span>
+
+    <span class="c1"># Graph hip points</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;userpage.html&#39;</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
