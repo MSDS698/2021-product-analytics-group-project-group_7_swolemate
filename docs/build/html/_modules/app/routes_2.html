@@ -31,12 +31,34 @@
           <div class="body" role="main">
             
   <h1>Source code for app.routes_2</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">application</span>
+<span></span><span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">application</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">db</span>
 <span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">url_for</span>
 <span class="kn">from</span> <span class="nn">flask_wtf</span> <span class="kn">import</span> <span class="n">FlaskForm</span>
 <span class="kn">from</span> <span class="nn">flask_wtf.file</span> <span class="kn">import</span> <span class="n">FileField</span><span class="p">,</span> <span class="n">FileRequired</span>
 <span class="kn">from</span> <span class="nn">wtforms</span> <span class="kn">import</span> <span class="n">SubmitField</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">boto3</span>
+
+<span class="kn">from</span> <span class="nn">flask_login</span> <span class="kn">import</span> <span class="n">current_user</span><span class="p">,</span> <span class="n">login_user</span><span class="p">,</span> <span class="n">login_required</span><span class="p">,</span> <span class="n">logout_user</span>
+
+<span class="c1"># S3 Upload Stuff</span>
+<div class="viewcode-block" id="upload_file_to_s3"><a class="viewcode-back" href="../../code.html#app.routes_2.upload_file_to_s3">[docs]</a><span class="k">def</span> <span class="nf">upload_file_to_s3</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">bucket_name</span><span class="p">,</span> <span class="n">acl</span><span class="o">=</span><span class="s2">&quot;public-read&quot;</span><span class="p">):</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">s3</span><span class="o">.</span><span class="n">upload_fileobj</span><span class="p">(</span>
+            <span class="n">file</span><span class="p">,</span>
+            <span class="n">bucket_name</span><span class="p">,</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
+            <span class="n">ExtraArgs</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;ACL&quot;</span><span class="p">:</span> <span class="n">acl</span><span class="p">,</span>
+                <span class="s2">&quot;ContentType&quot;</span><span class="p">:</span> <span class="n">file</span><span class="o">.</span><span class="n">content_type</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c1"># This is a catch all exception, edit this part to fit your needs.</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Something Happened: &quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">e</span></div>
 
 
 <div class="viewcode-block" id="UploadFileForm"><a class="viewcode-back" href="../../code.html#app.routes_2.UploadFileForm">[docs]</a><span class="k">class</span> <span class="nc">UploadFileForm</span><span class="p">(</span><span class="n">FlaskForm</span><span class="p">):</span>
@@ -49,7 +71,6 @@
 <span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Index Page : Renders index.html with author name.&quot;&quot;&quot;</span>
-    <span class="c1"># return (&quot;&lt;h1&gt; Hello World &lt;/h1&gt;&quot;)</span>
     <span class="n">images</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="s1">&#39;Good Form&#39;</span><span class="p">,</span> <span class="s1">&#39;image&#39;</span><span class="p">:</span> <span class="s1">&#39;https://images.pexels.com/photos/176782/pexels-photo-176782.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=1&amp;w=500&#39;</span><span class="p">},</span>
               <span class="p">{</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="s1">&#39;User Input&#39;</span><span class="p">,</span> <span class="s1">&#39;image&#39;</span><span class="p">:</span> <span class="s1">&#39;https://images.pexels.com/photos/176782/pexels-photo-176782.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=1&amp;w=500&#39;</span><span class="p">}]</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">,</span> <span class="n">images</span><span class="o">=</span><span class="n">images</span><span class="p">))</span></div>
@@ -67,20 +88,84 @@
 
 <div class="viewcode-block" id="upload"><a class="viewcode-back" href="../../code.html#app.routes_2.upload">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/upload&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
 <span class="k">def</span> <span class="nf">upload</span><span class="p">():</span>
+    <span class="n">bucket_name</span> <span class="o">=</span> <span class="s2">&quot;msds603-swolemate-s3&quot;</span>
+    <span class="n">aws_access_key_id</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;AWS_ACCESS_KEY_ID&#39;</span><span class="p">)</span>
+    <span class="n">aws_secret_access_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;AWS_SECRET_ACCESS_KEY&#39;</span><span class="p">)</span>
+    <span class="c1"># print(aws_access_key_id)</span>
+    <span class="c1"># print(aws_secret_access_key)</span>
+
     <span class="sd">&quot;&quot;&quot;upload a file from a client machine.&quot;&quot;&quot;</span>
     <span class="n">file</span> <span class="o">=</span> <span class="n">UploadFileForm</span><span class="p">()</span>  <span class="c1"># file : UploadFileForm class instance</span>
     <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>  <span class="c1"># Check it&#39;s a POST request that&#39;s valid</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">file_selector</span><span class="o">.</span><span class="n">data</span>  <span class="c1"># f : Data of FileField</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">filename</span>
-        <span class="c1"># filename : filename of FileField</span>
 
-        <span class="n">file_dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">application</span><span class="o">.</span><span class="n">instance_path</span><span class="p">,</span> <span class="s1">&#39;files&#39;</span><span class="p">)</span>
-        <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">file_dir_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
-        <span class="c1"># Save file to file_path (instance/ + &#39;files’ + filename)</span>
-        <span class="n">f</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">Session</span><span class="p">(</span>
+                <span class="n">aws_access_key_id</span><span class="o">=</span><span class="n">aws_access_key_id</span><span class="p">,</span>
+                <span class="n">aws_secret_access_key</span><span class="o">=</span><span class="n">aws_secret_access_key</span>
+                <span class="p">)</span>
+
+        <span class="n">session</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">&quot;s3&quot;</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">Bucket</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">put_object</span><span class="p">(</span><span class="n">Key</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">Body</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">ACL</span><span class="o">=</span><span class="s1">&#39;public-read-write&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">))</span>  <span class="c1"># Redirect to / (/index) page.</span>
     <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;upload.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">file</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># update :  log in &amp; log out</span>
+
+<div class="viewcode-block" id="register"><a class="viewcode-back" href="../../code.html#app.routes_2.register">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/register&#39;</span><span class="p">,</span>  <span class="n">methods</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">register</span><span class="p">():</span>
+    <span class="n">registration_form</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">RegistrationForm</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">registration_form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">registration_form</span><span class="o">.</span><span class="n">username</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">registration_form</span><span class="o">.</span><span class="n">password</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">email</span> <span class="o">=</span> <span class="n">registration_form</span><span class="o">.</span><span class="n">email</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="n">user_count</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">User</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> \
+                     <span class="o">+</span> <span class="n">classes</span><span class="o">.</span><span class="n">User</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">user_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;&lt;h1&gt;Error - Existing user : &#39;</span> <span class="o">+</span> <span class="n">username</span> \
+                   <span class="o">+</span> <span class="s1">&#39; OR &#39;</span> <span class="o">+</span> <span class="n">email</span> <span class="o">+</span> <span class="s1">&#39;&lt;/h1&gt;&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">User</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+            <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;register.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">registration_form</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="login"><a class="viewcode-back" href="../../code.html#app.routes_2.login">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">login</span><span class="p">():</span>
+    <span class="n">login_form</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">LogInForm</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">login_form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">login_form</span><span class="o">.</span><span class="n">username</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">login_form</span><span class="o">.</span><span class="n">password</span><span class="o">.</span><span class="n">data</span>
+        <span class="c1"># Look for it in the database.</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">User</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
+        <span class="c1"># Login and validate the user.</span>
+        <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">user</span><span class="o">.</span><span class="n">check_password</span><span class="p">(</span><span class="n">password</span><span class="p">):</span>
+            <span class="n">login_user</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">return</span><span class="p">(</span><span class="s2">&quot;&lt;h1&gt; Welcome </span><span class="si">{}</span><span class="s2">!&lt;/h1&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">username</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;login.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">login_form</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="logout"><a class="viewcode-back" href="../../code.html#app.routes_2.logout">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/logout&#39;</span><span class="p">)</span>
+<span class="nd">@login_required</span>
+<span class="k">def</span> <span class="nf">logout</span><span class="p">():</span>
+    <span class="n">before_logout</span> <span class="o">=</span> <span class="s1">&#39;&lt;h1&gt; Before logout - is_autheticated : &#39;</span> \
+                    <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&lt;/h1&gt;&#39;</span>
+
+    <span class="n">logout_user</span><span class="p">()</span>
+
+    <span class="n">after_logout</span> <span class="o">=</span> <span class="s1">&#39;&lt;h1&gt; After logout - is_autheticated : &#39;</span> \
+                   <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&lt;/h1&gt;&#39;</span>
+    <span class="k">return</span> <span class="n">before_logout</span> <span class="o">+</span> <span class="n">after_logout</span></div>
+
 </pre></div>
 
           </div>
@@ -104,7 +189,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../code.html">Auto Generated Code Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../code.html#demo-module">demo module</a></li>
 </ul>
 
 <div class="relations">

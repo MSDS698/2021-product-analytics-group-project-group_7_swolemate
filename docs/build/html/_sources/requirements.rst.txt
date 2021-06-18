@@ -1,73 +1,79 @@
 Requirements
 ================
 
-alabaster==0.7.12
-attrs==21.2.0
-awsebcli==3.19.4
-Babel==2.9.1
-bcrypt==3.2.0
-blessed==1.18.0
-boto3==1.17.80
-botocore==1.20.80
-cached-property==1.5.2
-cement==2.8.2
-certifi==2021.5.30
-cffi==1.14.5
-chardet==4.0.0
-click==8.0.1
-colorama==0.4.3
-cryptography==3.4.7
-docker==4.4.4
-docker-compose==1.25.5
-dockerpty==0.4.1
-docopt==0.6.2
-docutils==0.17.1
-Flask==2.0.1
-Flask-WTF==0.15.1
-future==0.16.0
-idna==2.10
-imagesize==1.2.0
-iniconfig==1.1.1
-itsdangerous==2.0.1
-Jinja2==3.0.1
-jmespath==0.10.0
-jsonschema==3.2.0
-MarkupSafe==2.0.1
-numpy==1.20.3
-opencv-python==4.5.2.52
-packaging==20.9
-paramiko==2.7.2
-pathspec==0.5.9
-pluggy==0.13.1
-py==1.10.0
-pycparser==2.20
-Pygments==2.9.0
-PyNaCl==1.4.0
-pyparsing==2.4.7
-pyrsistent==0.17.3
-pytest==6.2.4
-python-dateutil==2.8.1
-python-dotenv==0.17.1
-pytz==2021.1
-PyYAML==5.3.1
-requests==2.25.1
-s3transfer==0.4.2
-semantic-version==2.8.5
-six==1.14.0
-snowballstemmer==2.1.0
-Sphinx==4.0.2
-sphinxcontrib-applehelp==1.0.2
-sphinxcontrib-devhelp==1.0.2
-sphinxcontrib-htmlhelp==2.0.0
-sphinxcontrib-jsmath==1.0.1
-sphinxcontrib-qthelp==1.0.3
-sphinxcontrib-serializinghtml==1.1.5
-termcolor==1.1.0
-texttable==1.6.3
-toml==0.10.2
-tqdm==4.61.0
-urllib3==1.25.11
-wcwidth==0.1.9
-websocket-client==0.59.0
-Werkzeug==2.0.1
-WTForms==2.3.3
+| alabaster==0.7.12 
+| attrs==21.2.0
+| awsebcli==3.19.4
+| Babel==2.9.1
+| bcrypt==3.2.0
+| blessed==1.18.0
+| boto3==1.17.80
+| botocore==1.20.80
+| cached-property==1.5.2
+| cement==2.8.2
+| certifi==2021.5.30
+| cffi==1.14.5
+| chardet==4.0.0
+| click==8.0.1
+| colorama==0.4.3
+| cryptography==3.4.7
+| docker==4.4.4
+| docker-compose==1.25.5
+| dockerpty==0.4.1
+| docopt==0.6.2
+| docutils==0.17.1
+| Flask==2.0.1
+| Flask-Login==0.5.0
+| Flask-SQLAlchemy==2.5.1
+| Flask-WTF==0.15.1
+| future==0.16.0
+| greenlet==1.1.0
+| idna==2.10
+| imagesize==1.2.0
+| iniconfig==1.1.1
+| itsdangerous==2.0.1
+| Jinja2==3.0.1
+| jmespath==0.10.0
+| jsonschema==3.2.0
+| MarkupSafe==2.0.1
+| numpy==1.20.3
+| opencv-python==4.5.2.52
+| packaging==20.9
+| paramiko==2.7.2
+| pathspec==0.5.9
+| pluggy==0.13.1
+| psycopg2==2.9.1
+| py==1.10.0
+| pycodestyle==2.7.0
+| pycparser==2.20
+| Pygments==2.9.0
+| PyNaCl==1.4.0
+| pyparsing==2.4.7
+| pyrsistent==0.17.3
+| pytest==6.2.4
+| python-dateutil==2.8.1
+| python-dotenv==0.17.1
+| pytz==2021.1
+| PyYAML==5.3.1
+| requests==2.25.1
+| s3transfer==0.4.2
+| semantic-version==2.8.5
+| six==1.14.0
+| snowballstemmer==2.1.0
+| Sphinx==4.0.2
+| sphinxcontrib-applehelp==1.0.2
+| sphinxcontrib-devhelp==1.0.2
+| sphinxcontrib-htmlhelp==2.0.0
+| sphinxcontrib-jsmath==1.0.1
+| sphinxcontrib-qthelp==1.0.3
+| sphinxcontrib-serializinghtml==1.1.5
+| SQLAlchemy==1.4.17
+| termcolor==1.1.0
+| texttable==1.6.3
+| toml==0.10.2
+| tqdm==4.61.0
+| urllib3==1.25.11
+| wcwidth==0.1.9
+| websocket-client==0.59.0
+| Werkzeug==2.0.1
+| WTForms==2.3.3
