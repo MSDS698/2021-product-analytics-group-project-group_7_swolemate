@@ -21,4 +21,4 @@ login_manager.init_app(application)
 
 # routes.py needs to import "application" variable in __init__.py - breaks PEP8
 from app import classes
-from app import routes_2
+from app import routes
