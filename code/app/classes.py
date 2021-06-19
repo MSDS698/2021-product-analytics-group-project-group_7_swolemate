@@ -12,6 +12,14 @@ import requests
 
 from app import db, login_manager
 
+authors = [{'name':'Kexin Wang','position':'CEO','linkedin':'https://www.linkedin.com/in/sheena-kexin-wang-3a51b7170/', 'pic':'https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/pic1_-_kexin_wang.jpg?itok=Sx5fOi-S'},
+{'name':'Daniel Carrera', 'position':'CTO','linkedin':'https://www.linkedin.com/in/daniel-carrera/','pic':'https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/catalog/arts_and_sciences/img_3126_-_daniel_carrera.jpg?itok=V2Fpl961'}, 
+{'name':'Boliang Liu','position':'Data Scientist','linkedin':'https://www.linkedin.com/in/boliang-liu/','pic':'https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/images/headshots/boliang_liu.jpg?itok=goQGlgND'},
+{'name':'Elyse Cheung-Sutton','position':'Data Scientist', 'linkedin':'https://www.linkedin.com/in/elysecs/','pic':'https://www.usfca.edu/sites/default/files/images/headshots/elyse_cheung-sutton.jpg'},
+{'name':'Kris Johnson','position':'Data Scientist','linkedin':'https://www.linkedin.com/in/kr-johnson/','pic':'https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/images/headshots/kristofor_johnson.jpg?itok=UOXI4F-1'},
+{'name':'Moh Kaddoura', 'position':'Data Scientist','linkedin':'https://www.linkedin.com/in/moh-kaddoura/','pic':'https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/images/headshots/moh_kaddoura.jpg?itok=AtQnH6ya'},
+{'name':'Suren Gunturu', 'position':'Data Scientist','linkedin':'https://www.linkedin.com/in/suren-gunturu/','pic':'https://www.usfca.edu/sites/default/files/images/headshots/suren_gunturu.jpg'}, 
+{'name':'Wenyao Zhang', 'position':'Data Scientist', 'linkedin':'https://www.linkedin.com/in/wenyao-zhang/','pic':'https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/images/headshots/wenyao-zhang.jpg?itok=Y09MBXza'}]
 
 class UploadFileForm(FlaskForm):
     """Class for uploading file when submitted"""

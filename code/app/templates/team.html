@@ -5,11 +5,10 @@
     <table>
         {% for a in authors %}
         <tr>
-            <td align=center width="50"><img src=https://media1.tenor.com/images/db3c9623a0fe7a4c7715c71c9c61fcc5/tenor.gif?itemid=10681166></td>
+            <td align=center width="50"><img src={{  a.pic  }}></td>
             <td style="font-size:70%; font-family:Verdana, sans-serif">
-                <a href="google.com">{{ a }}</a><br>
-                A cool person<br>
-                who wants to rule the world
+                <a href={{  a.linkedin  }}>{{ a.name }}</a>
+                <br>{{  a.position  }}<br>
             </td>
         </tr>
         {% endfor %}

@@ -23,11 +23,7 @@ def index():
 @application.route('/team')
 def team():
     """Index Page : Renders index.html with author name."""
-    # return ("<h1> Hello World </h1>")
-    authors = ['Boliang Liu', 'Daniel Carrera', 'Elyse Cheung-Sutton',
-               'Kris Johnson', 'Kexin Wang', 'Moh Kaddoura',
-               'Suren Gunturu', 'Wenyao Zhang']
-    return (render_template('team.html', authors=authors))
+    return (render_template('team.html', authors=classes.authors))
 
 
 @application.route('/upload', methods=['GET', 'POST'])
@@ -125,6 +121,7 @@ def plot_png():
 
     
 @application.route('/userpage')
+@login_required
 def userpage():
     # Show Shiqi vid
 
