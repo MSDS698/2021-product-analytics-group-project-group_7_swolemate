@@ -11,6 +11,8 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from flask_login import current_user, login_user, login_required, logout_user
 
 
+
+
 @application.route('/index')
 @application.route('/')
 def index():
@@ -116,13 +118,13 @@ def logout():
                    + str(current_user.is_authenticated) + '</h1>'
     return before_logout + after_logout
 
-@application.route('/plot.png')
-def plot_png():
-    fig = classes.create_figure()
-    output = io.BytesIO()
-    FigureCanvas(fig).print_png(output)
-    return Response(output.getvalue(), mimetype='image/png')
-
+#@application.route('/plot.png')
+#def plot_png():
+#    fig = classes.create_figure()
+#    output = io.BytesIO()
+#    FigureCanvas(fig).print_png(output)
+#    return Response(output.getvalue(), mimetype='image/png')
+#
     
 @application.route('/userpage')
 def userpage():
