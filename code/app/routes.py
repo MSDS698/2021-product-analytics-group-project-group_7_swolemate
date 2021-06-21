@@ -32,15 +32,12 @@ def upload():
     bucket_name = "msds603-swolemate-s3"
     aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
-    # s3_location = 'http://{}.s3.amazonaws.com/'.format(bucket_name)
     s3_location = 'https://s3.console.aws.amazon.com/s3/buckets/msds603-swolemate-s3'
-    # print(aws_access_key_id)
-    # print(aws_secret_access_key)
 
     """upload a file from a client machine."""
     file = classes.UploadFileForm()  # file : UploadFileForm class instance
     if file.validate_on_submit():  # Check it's a POST request that's valid
-        print (dict(classes.WORKOUT_CHOICES).get(file.selection.data))
+        workout_type = dict(classes.WORKOUT_CHOICES).get(file.selection.data)
         f = file.file_selector.data  # f : Data of FileField
         filename = f.filename
 
