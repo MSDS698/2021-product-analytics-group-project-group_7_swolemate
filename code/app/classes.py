@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
-from wtforms import PasswordField, StringField, SubmitField
+from wtforms import PasswordField, StringField, SubmitField, SelectField
 from wtforms.validators import DataRequired
 from flask_wtf.file import FileField, FileRequired
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -24,6 +24,7 @@ authors = [{'name':'Kexin Wang','position':'CEO','linkedin':'https://www.linkedi
 class UploadFileForm(FlaskForm):
     """Class for uploading file when submitted"""
     file_selector = FileField('File', validators=[FileRequired()])
+    selection = SelectField('Workout_Name', choices=[('1','Bicep Curl'),('2', 'Front Raise')])
     submit = SubmitField('Submit')
 
 class User(db.Model, UserMixin):

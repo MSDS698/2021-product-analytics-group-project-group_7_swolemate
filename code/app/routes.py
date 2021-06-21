@@ -39,6 +39,7 @@ def upload():
     """upload a file from a client machine."""
     file = classes.UploadFileForm()  # file : UploadFileForm class instance
     if file.validate_on_submit():  # Check it's a POST request that's valid
+        print(file.selection.data)
         f = file.file_selector.data  # f : Data of FileField
         filename = f.filename
 
@@ -123,7 +124,4 @@ def plot_png():
 @application.route('/userpage')
 @login_required
 def userpage():
-    # Show Shiqi vid
-
-    # Graph hip points
-    return render_template('userpage.html')
+    return render_template('userpage.html', name=current_user.username)
