@@ -119,7 +119,15 @@ def plot_png():
     return Response(output.getvalue(), mimetype='image/png')
 
     
-@application.route('/userpage')
+@application.route('/userpage', methods=['GET', 'POST'])
 @login_required
 def userpage():
-    return render_template('userpage.html', name=current_user.username)
+    bucket_name = "msds603-swolemate-s3"
+    s3 = boto3.resource('s3')
+    my_bucket = s3.Bucket(bucket_name)
+    unsorted_keys = []
+
+    for object_summary in my_bucket.objects.filter():
+        unsorted_keys.append([object_summary.key, object_summary.last_modified.strftime("%Y-%m-%d %H:%M:%S")])
+
+    return render_template('userpage.html', name=current_user.username, items=unsorted_keys)
