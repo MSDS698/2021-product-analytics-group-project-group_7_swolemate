@@ -9,3 +9,7 @@ docker run -v /tmp/mountdir:/home/appuser/detectron2_repo/mountdir -it zwy820330
 less /tmp/mountdir/video_output.json
 ```
 
+Evaluation
+```shell
+python evaluation_bicep.py video_output.json
+```
