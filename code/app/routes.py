@@ -27,6 +27,7 @@ def team():
 
 
 @application.route('/upload', methods=['GET', 'POST'])
+@login_required
 def upload():
     bucket_name = "msds603-swolemate-s3"
     aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
@@ -39,7 +40,7 @@ def upload():
     """upload a file from a client machine."""
     file = classes.UploadFileForm()  # file : UploadFileForm class instance
     if file.validate_on_submit():  # Check it's a POST request that's valid
-        print(file.selection.data)
+        print (dict(classes.WORKOUT_CHOICES).get(file.selection.data))
         f = file.file_selector.data  # f : Data of FileField
         filename = f.filename
 

@@ -21,10 +21,12 @@ authors = [{'name':'Kexin Wang','position':'CEO','linkedin':'https://www.linkedi
 {'name':'Suren Gunturu', 'position':'Data Scientist','linkedin':'https://www.linkedin.com/in/suren-gunturu/','pic':'https://www.usfca.edu/sites/default/files/images/headshots/suren_gunturu.jpg'}, 
 {'name':'Wenyao Zhang', 'position':'Data Scientist', 'linkedin':'https://www.linkedin.com/in/wenyao-zhang/','pic':'https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/images/headshots/wenyao-zhang.jpg?itok=Y09MBXza'}]
 
+WORKOUT_CHOICES = [('1','Bicep Curl'),('2', 'Front Raise')]
+
 class UploadFileForm(FlaskForm):
     """Class for uploading file when submitted"""
     file_selector = FileField('File', validators=[FileRequired()])
-    selection = SelectField('Workout_Name', choices=[('1','Bicep Curl'),('2', 'Front Raise')])
+    selection = SelectField('Workout_Name', choices=WORKOUT_CHOICES)
     submit = SubmitField('Submit')
 
 class User(db.Model, UserMixin):
