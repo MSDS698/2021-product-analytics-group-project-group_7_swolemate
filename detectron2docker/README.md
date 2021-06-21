@@ -10,6 +10,7 @@ less /tmp/mountdir/video_output.json
 ```
 
 Evaluation
+1) Before running, unzip poses_compressed.zip
 ```shell
 python evaluation_bicep.py video_output.json
 ```
