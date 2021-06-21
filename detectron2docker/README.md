@@ -1,3 +1,4 @@
+Create Pose Coordinates and store as JSON File
 ```shell
 mkdir /tmp/mountdir
 # fetch the test video. This one has 3 seconds.
