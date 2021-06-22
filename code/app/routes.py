@@ -15,8 +15,10 @@ from flask_login import current_user, login_user, login_required, logout_user
 @application.route('/')
 def index():
     """Index Page : Renders index.html with author name."""
-    images = [{'text': 'Good Form', 'image': 'https://images.pexels.com/photos/176782/pexels-photo-176782.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500'},
-              {'text': 'User Input', 'image': 'https://images.pexels.com/photos/176782/pexels-photo-176782.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500'}]
+    images = [{'text': 'Good Form',
+              'image': 'https://images.pexels.com/photos/176782/pexels-photo-176782.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500'},
+              {'text': 'User Input',
+              'image': 'https://images.pexels.com/photos/176782/pexels-photo-176782.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500'}]
     return (render_template('index.html', images=images))
 
 
@@ -57,9 +59,6 @@ def upload():
     return render_template('upload.html', form=file)
 
 
-
-# update :  log in & log out
-
 @application.route('/register',  methods=('GET', 'POST'))
 def register():
     registration_form = classes.RegistrationForm()
@@ -69,7 +68,7 @@ def register():
         email = registration_form.email.data
 
         user_count = classes.User.query.filter_by(username=username).count() \
-                     + classes.User.query.filter_by(email=email).count()
+            + classes.User.query.filter_by(email=email).count()
         if (user_count > 0):
             return '<h1>Error - Existing user : ' + username \
                    + ' OR ' + email + '</h1>'
@@ -111,6 +110,7 @@ def logout():
                    + str(current_user.is_authenticated) + '</h1>'
     return before_logout + after_logout
 
+
 @application.route('/plot.png')
 def plot_png():
     fig = classes.create_figure()
@@ -118,7 +118,7 @@ def plot_png():
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
 
-    
+
 @application.route('/userpage', methods=['GET', 'POST'])
 @login_required
 def userpage():
@@ -128,6 +128,7 @@ def userpage():
     unsorted_keys = []
 
     for object_summary in my_bucket.objects.filter():
-        unsorted_keys.append([object_summary.key, object_summary.last_modified.strftime("%Y-%m-%d %H:%M:%S")])
+        unsorted_keys.append([object_summary.key,
+                              object_summary.last_modified.strftime("%Y-%m-%d %H:%M:%S")])
 
     return render_template('userpage.html', name=current_user.username, items=unsorted_keys)
