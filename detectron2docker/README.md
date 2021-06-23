@@ -9,8 +9,12 @@ docker run -v /tmp/mountdir:/home/appuser/detectron2_repo/mountdir -it zwy820330
 less /tmp/mountdir/video_output.json
 ```
 
-Evaluation
+Evaluate the exercise
 1) Before running, unzip poses_compressed.zip
 ```shell
 python evaluation_bicep.py video_output.json
+```
+or 
+```shell
+python evaluation_shoulderpress.py video_output.json
 ```
