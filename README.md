@@ -1,5 +1,5 @@
-# 2021-product-analytics-group-project-group_7_swolemate
-__deploy.sh, docker-compose.yml, code/, requirements.txt__ all under __swolemate_flask/__ directory
+# Swolemate
+*Final project of Product Analytics, USF MSDS program*
 
 
 # About
@@ -30,3 +30,5 @@ We used Python documentation generation tool to generate document.
 
 
 ## Elastic Beanstalk   <img src = './readme/aws.jpeg' height = 20>
+
+We used AWS Elastic Beanstalk to deploy our application, so it's easy to scale and update based on user growth.
