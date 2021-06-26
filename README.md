@@ -9,3 +9,11 @@ __deploy.sh, docker-compose.yml, code/, requirements.txt__ all under __swolemate
 **CEO**: Kexin Wang <br>
 **Front End**:  Elyse Cheung-Sutton, Daniel Carrera, Moh Kaddoura <br>
 **Back End**: Suren Gunturu, Kristofor Johnson, Wenyao Zhang, Boliang Liu
+
+
+# Technical Components
+
+
+## Trello Project Management
+
+We used project management tool Trello to track tasks and progress
