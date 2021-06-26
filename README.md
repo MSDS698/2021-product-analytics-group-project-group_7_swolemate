@@ -26,7 +26,7 @@ We used Python documentation generation tool to generate document.
 
 <img src = './readme/sphinx.png'>
 
-## Docker <img src = './readme/docker.png' height = 30>
+## Docker <img src = './readme/docker.png' height = 25>
 
 
 ## Elastic Beanstalk <img src = './readme/aws.jpeg' height = 30>
