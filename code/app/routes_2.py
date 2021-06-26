@@ -3,7 +3,9 @@ from flask import render_template, redirect, url_for, Response
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from wtforms import SubmitField
+from werkzeug.utils import secure_filename
 import os
+import subprocess
 import boto3
 import io
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -46,19 +48,33 @@ def upload():
     file = classes.UploadFileForm()  # file : UploadFileForm class instance
     if file.validate_on_submit():  # Check it's a POST request that's valid
         f = file.file_selector.data  # f : Data of FileField
-        filename = f.filename
+        filename = secure_filename(f.filename)
+        f.save(os.path.join(
+            'videos', filename
+        ))
 
-        session = boto3.Session(
-                aws_access_key_id=aws_access_key_id,
-                aws_secret_access_key=aws_secret_access_key
-                )
+        items = filename.split('.')
+        subprocess.run([
+            'python3', 'detectron2_repo/demo/demo.py',
+            '--config-file', 'detectron2_repo/configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml',
+            '--video-input', 'videos/' + filename,
+            '--output', 'output/' + items[0] + '.json',
+            '--opts',
+            'MODEL.WEIGHTS', 'detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl',
+            'MODEL.DEVICE', 'cpu',
+        ])
 
-        session.resource("s3")\
-            .Bucket(bucket_name)\
-            .put_object(Key=filename, Body=f, ACL='public-read-write')
-
-        uploaded_file = 'https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
-        print(uploaded_file)
+        # session = boto3.Session(
+        #         aws_access_key_id=aws_access_key_id,
+        #         aws_secret_access_key=aws_secret_access_key
+        #         )
+        #
+        # session.resource("s3")\
+        #     .Bucket(bucket_name)\
+        #     .put_object(Key=filename, Body=f, ACL='public-read-write')
+        #
+        # uploaded_file = 'https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
+        # print(uploaded_file)
 
         return redirect(url_for('userpage'))  # Redirect to / (/index) page.
     return render_template('upload.html', form=file)

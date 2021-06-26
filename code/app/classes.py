@@ -4,7 +4,7 @@ from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 from wtforms import PasswordField, StringField, SubmitField
 from wtforms.validators import DataRequired
-from flask_wtf.file import FileField, FileRequired
+from flask_wtf.file import FileField, FileRequired, FileAllowed
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
@@ -15,7 +15,10 @@ from app import db, login_manager
 
 class UploadFileForm(FlaskForm):
     """Class for uploading file when submitted"""
-    file_selector = FileField('File', validators=[FileRequired()])
+    file_selector = FileField('File', validators=[
+        FileRequired(),
+        FileAllowed(['mp4'], 'mp4 video only'),
+    ])
     submit = SubmitField('Submit')
 
 class User(db.Model, UserMixin):
