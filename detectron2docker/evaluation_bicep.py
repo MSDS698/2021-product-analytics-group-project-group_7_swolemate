@@ -225,7 +225,7 @@ def DTWDistance(s1, s2):
 
     return np.sqrt(DTW[len(s1)-1, len(s2)-1])
 
-def Kmeans_test(names, X_train_1, X_train_2, data=None, side=None, bool_val=False): 
+def Kmeans_test(names, X_train_1, X_train_2, data=None, side=None, bool_val=False, n_neighbors=3): 
     if not bool_val:
         X_test_1, X_test_2 = load_features(names)
     else: 
@@ -246,8 +246,39 @@ def Kmeans_test(names, X_train_1, X_train_2, data=None, side=None, bool_val=Fals
             else:
                 f1_bad.append(dist1)
                 f2_bad.append(dist2)
-        good_score = np.mean(f1_good) + np.mean(f2_good)
-        bad_score = np.mean(f1_bad) + np.mean(f2_bad)
+                
+        f1_good = np.array(f1_good)
+        f2_bad = np.array(f2_bad)
+        f2_good = np.array(f2_good)
+        f1_bad = np.array(f1_bad)
+                
+        # sort good indices in first dimension
+        good_idx_sort = np.argsort(f1_good)
+        bad_idx_sort = np.argsort(f1_bad)
+        
+        f1_good = f1_good[good_idx_sort]
+        f2_good = f2_good[good_idx_sort]
+        f1_bad = f1_bad[bad_idx_sort]
+        f2_bad = f2_bad[bad_idx_sort]
+        
+        # Plotting points, DO WE NEED?
+        """plt.scatter(f1_good, f2_good, label='Distance to Good Form Ex.')
+        plt.scatter(f1_bad, f2_bad, label='Distance to Bad Form Ex.')
+        plt.xlabel("Distance using Upper Arm Torso Angle (in Degrees)")
+        plt.ylabel("Distance using Upper Arm Forearm Angle (in Degrees)")
+        plt.title(f"Distance between {names[example]} and Good/Bad Examples")
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+        plt.show()"""
+        
+        good_score = np.mean(f1_good[:n_neighbors]) + np.mean(f2_good[:n_neighbors])
+        bad_score = np.mean(f1_bad[:n_neighbors]) + np.mean(f2_bad[:n_neighbors])
+        
+        percentage = (good_score - bad_score) / bad_score * 100 * -1 # percentage
+        
+        if percentage > 0: 
+            print(f"How good the form is in terms of percentage: {round(percentage, 2)}%")
+        else: 
+            print(f"How bad the form is in terms of percentage: {round(percentage, 2)}%")
 
         # if distance is closer to good form exercises
         if good_score < bad_score:
@@ -256,29 +287,33 @@ def Kmeans_test(names, X_train_1, X_train_2, data=None, side=None, bool_val=Fals
         else: # distance close to bad form exercises
             predictions.append(0)
             analysis.append("Exercise needs some work")
+            
+        # If we are plotting, add this print statement below
+        # print("-------------------------------------------------------------------------------------------------------------------")
     return analysis, predictions
 
 
 
 if __name__ == "__main__":
     json_file_name = sys.argv[1]
+    side = sys.argv[2]
+    if side != 'left' and side != 'right': 
+        print("Invalid side type, can only take on values: left or right")
+        exit()
     data = load_tester(json_file_name)
     
-    files = files_in_order('poses_compressed/bicep')
-    X_train_names, X_test_names = train_test_split(files, test_size=0.4, random_state=42)
+    X_train_names = files_in_order('poses_compressed/bicep')
     y_train = get_labels(X_train_names)
-    y_test = get_labels(X_test_names)
     
     new_data = load_tester('moh_bicep_curl_ex.json')
     
     X_train_1, X_train_2 = load_features(X_train_names)
-    X_test_1, X_test_2 = load_features(X_test_names)
     
     # adding new data
-    inp_seq_1, inp_seq_2 = load_features(['demo'], new_data, 'left', bool_val=True)
+    """inp_seq_1, inp_seq_2 = load_features(['demo'], new_data, side, bool_val=True)
     X_train_1.append(inp_seq_1[0])
     X_train_2.append(inp_seq_2[0])
-    y_train = np.append(y_train, 1)
+    y_train = np.append(y_train, 1)"""
     
-    print(Kmeans_test(['demo'], X_train_1, X_train_2, data, 'left', True))
+    print(Kmeans_test(['demo'], X_train_1, X_train_2, data, side, True))
     

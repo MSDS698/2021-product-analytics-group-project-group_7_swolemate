@@ -8,6 +8,14 @@ docker run -v /tmp/mountdir:/home/appuser/detectron2_repo/mountdir -it zwy820330
 # output contains a list of maps. Each frame in the video has a map in the list.
 less /tmp/mountdir/video_output.json
 ```
+To run bicep evaluation:
+```shell
+python evaluation_bicep.py /tmp/mountdir/video_output.json side
+```
+where side can take values either left or right
+
+Once you run bicep evaluation, a percentage will be outputted showing the scale
+  of how good/bad the form of the particular exercise is. 
 
 Evaluate the exercise
 1) Before running, unzip poses_compressed.zip
