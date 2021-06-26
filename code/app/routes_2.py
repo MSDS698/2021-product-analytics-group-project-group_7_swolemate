@@ -63,6 +63,8 @@ def upload():
             'MODEL.WEIGHTS', 'detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl',
             'MODEL.DEVICE', 'cpu',
         ])
+        
+        
 
         # session = boto3.Session(
         #         aws_access_key_id=aws_access_key_id,
