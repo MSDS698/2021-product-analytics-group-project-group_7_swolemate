@@ -7,6 +7,7 @@ from flask_login import LoginManager
 # Initialization
 # Create an application instance, handles all requests.
 application = Flask(__name__)
+application._static_folder = 'static'
 #application.secret_key = os.urandom(24)
 application.config.from_object(Config)
 db = SQLAlchemy(application)
