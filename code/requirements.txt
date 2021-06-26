@@ -1,0 +1,12 @@
+awsebcli
+boto3
+cufflinks
+flask-bootstrap
+flask-login
+flask-sqlalchemy
+flask-wtf
+matplotlib
+paramiko
+pip-chill
+psycopg2
+sphinx-rtd-theme
