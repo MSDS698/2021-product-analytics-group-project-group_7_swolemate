@@ -10,6 +10,10 @@
 **Front End**:  Elyse Cheung-Sutton, Daniel Carrera, Moh Kaddoura <br>
 **Back End**: Suren Gunturu, Kristofor Johnson, Wenyao Zhang, Boliang Liu
 
+<img src = './readme/new_image_girl.png' height = 200>
+
+<img src = './readme/new_image_boy.png' height = 200>
+
 
 # Technical Components
 
