@@ -14,7 +14,7 @@ __deploy.sh, docker-compose.yml, code/, requirements.txt__ all under __swolemate
 # Technical Components
 
 
-## Trello Project Management
+## Trello Project Management <img src = './readme/Trello2.png' height = 30>
 
 We used project management tool Trello to track tasks and progress.
 
@@ -26,7 +26,7 @@ We used Python documentation generation tool to generate document.
 
 <img src = './readme/sphinx.png'>
 
-## Docker
+## Docker <img src = './readme/docker.png' height = 30>
 
 
-## Elastic Beanstalk
+## Elastic Beanstalk <img src = './readme/aws.jpeg' height = 30>
