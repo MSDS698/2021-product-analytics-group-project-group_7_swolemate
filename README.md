@@ -14,7 +14,7 @@ __deploy.sh, docker-compose.yml, code/, requirements.txt__ all under __swolemate
 # Technical Components
 
 
-## Trello Project Management <img src = './readme/trello2.png' height = 20>
+## Trello Project Management <img src = './readme/trello2.jpeg' height = 20>
 
 We used project management tool Trello to track tasks and progress.
 
