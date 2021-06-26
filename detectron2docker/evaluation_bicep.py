@@ -297,6 +297,9 @@ def Kmeans_test(names, X_train_1, X_train_2, data=None, side=None, bool_val=Fals
 if __name__ == "__main__":
     json_file_name = sys.argv[1]
     side = sys.argv[2]
+    if side != 'left' and side != 'right': 
+        print("Invalid side type, can only take on values: left or right")
+        exit()
     data = load_tester(json_file_name)
     
     X_train_names = files_in_order('poses_compressed/bicep')
