@@ -1,7 +1,7 @@
 version: "3"
 services:
   web:
-    image: kjohnson23/swole_frontend
+    image: zwy8203302/app:v0
     ports:
       - "80:5000"
     container_name: web
