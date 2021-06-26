@@ -3,7 +3,7 @@ __deploy.sh, docker-compose.yml, code/, requirements.txt__ all under __swolemate
 
 # About
 
-* Providing Hollywood level training in the comfort of your home
+*Providing Hollywood level training in the comfort of your home
 
 **CEO**: Kexin Wang <br>
 **Front End**:  Elyse Cheung-Sutton, Daniel Carrera, Moh Kaddoura <br>
