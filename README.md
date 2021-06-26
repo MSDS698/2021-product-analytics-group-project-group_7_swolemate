@@ -20,13 +20,13 @@
 
 We used project management tool Trello to track tasks and progress.
 
-<img src = './readme/trello.png'>
+<img src = './readme/trello.png' height = 350>
 
 ## Sphinx
 
 We used Python documentation generation tool to generate document.
 
-<img src = './readme/sphinx.png'>
+<img src = './readme/sphinx.png' height = 350>
 
 ## Docker   <img src = './readme/docker.png' height = 20>
 
