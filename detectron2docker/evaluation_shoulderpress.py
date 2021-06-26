@@ -213,7 +213,7 @@ def load_features(names, data=None, side=None, bool_val=False):
     return output1, output2
 
 # Compute Dynamic Time Warp Distance of two sequences
-# http://alexminnaar.com/time-series-classification-and-clustering-with-python.html
+# http://alexminnaar.com/2014/04/16/Time-Series-Classification-and-Clustering-with-Python.html
 def DTWDistance(s1, s2):
     DTW={}
 
