@@ -40,8 +40,13 @@ def team():
 
 @application.route('/upload', methods=['GET', 'POST'])
 def upload():
+    aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
+    aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    # s3_location = 'http://{}.s3.amazonaws.com/'.format(bucket_name)
     bucket_name = "swolemate-s3"
     s3_location = 'https://s3.console.aws.amazon.com/s3/buckets/swolemate-s3'
+    # print(aws_access_key_id)
+    # print(aws_secret_access_key)
 
     """upload a file from a client machine."""
     file = classes.UploadFileForm()  # file : UploadFileForm class instance
@@ -51,13 +56,14 @@ def upload():
         
         f = file.file_selector.data  # f : Data of FileField
         filename = secure_filename(f.filename)
+        
         f.save(os.path.join(
             'videos', filename
         ))
 
         items = filename.split('.')
         subprocess.run([
-            'python3', 'detectron2_repo/demo/demo.py',
+            'python3', 'detectron2/demo.py',
             '--config-file', 'detectron2_repo/configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml',
             '--video-input', 'videos/' + filename,
             '--output', 'output/' + items[0] + '.json',
@@ -76,19 +82,16 @@ def upload():
         X_train_1, X_train_2 = load_features(X_train_names)
 
         value, _, _ = kmeans_test(['demo'], X_train_1=X_train_1, X_train_2=X_train_2, y_train=y_train, data=data, side=side, bool_val=True, exercise=workout_type)
-
-        """session = boto3.Session(
-                 aws_access_key_id=aws_access_key_id,
-                 aws_secret_access_key=aws_secret_access_key
-                 )
         
+        
+        """session = boto3.Session()
+
         session.resource("s3")\
-         .Bucket(bucket_name)\
-         .put_object(Key=filename, Body=f, ACL='public-read-write')
-        
-        uploaded_file = 'https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
-        print(uploaded_file)"""
+            .Bucket(bucket_name)\
+            .put_object(Key=filename, Body=f, ACL='public-read-write')
 
+        uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
+        """
         #return redirect(url_for('userpage', value=value))  # Redirect to / (/index) page.
         return userpage(value)
     return render_template('upload.html', form=file)

@@ -30,14 +30,9 @@
 
     <body>
         <!-- Navigation-->
-        <nav class="navbar navbar-light bg-light static-top">
-            <div class="container">
-                <a class="navbar-brand" href="#!">Swolemate</a>
-                <a class="btn btn-primary" href="/register">Sign Up</a>
-                <a class="btn btn-light" href="/login">Log In</a>
-            </div>
-        </nav>
-
+        {% block navbar %}
+            {% include 'navbar.html' %}
+        {% endblock %}
         <!-- Masthead-->
         <header class="masthead">
             <div class="container position-relative">
