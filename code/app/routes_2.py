@@ -43,6 +43,8 @@ def upload():
     bucket_name = "msds603-swolemate-s3"
     aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    
+    print(aws_access_key_id)
     # s3_location = 'http://{}.s3.amazonaws.com/'.format(bucket_name)
     s3_location = 'https://s3.console.aws.amazon.com/s3/buckets/msds603-swolemate-s3'
     # print(aws_access_key_id)
@@ -51,6 +53,9 @@ def upload():
     """upload a file from a client machine."""
     file = classes.UploadFileForm()  # file : UploadFileForm class instance
     if file.validate_on_submit():  # Check it's a POST request that's valid
+        workout_type = dict(classes.WORKOUT_CHOICES).get(file.exercise_selection.data)
+        side = dict(classes.SIDE_CHOICES).get(file.side_selection.data)
+        
         f = file.file_selector.data  # f : Data of FileField
         filename = secure_filename(f.filename)
         f.save(os.path.join(
@@ -76,21 +81,20 @@ def upload():
         y_train = get_labels(X_train_names)
 
         X_train_1, X_train_2 = load_features(X_train_names)
-        side = 'right'
 
-        value, _, _ = kmeans_test(['demo'], X_train_1=X_train_1, X_train_2=X_train_2, y_train=y_train, data=data, side=side, bool_val=True, exercise='bicep')
+        value, _, _ = kmeans_test(['demo'], X_train_1=X_train_1, X_train_2=X_train_2, y_train=y_train, data=data, side=side, bool_val=True, exercise=workout_type)
 
-        # session = boto3.Session(
-        #         aws_access_key_id=aws_access_key_id,
-        #         aws_secret_access_key=aws_secret_access_key
-        #         )
-        #
-        # session.resource("s3")\
-        #     .Bucket(bucket_name)\
-        #     .put_object(Key=filename, Body=f, ACL='public-read-write')
-        #
-        # uploaded_file = 'https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
-        # print(uploaded_file)
+        """session = boto3.Session(
+                 aws_access_key_id=aws_access_key_id,
+                 aws_secret_access_key=aws_secret_access_key
+                 )
+        
+        session.resource("s3")\
+         .Bucket(bucket_name)\
+         .put_object(Key=filename, Body=f, ACL='public-read-write')
+        
+        uploaded_file = 'https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
+        print(uploaded_file)"""
 
         #return redirect(url_for('userpage', value=value))  # Redirect to / (/index) page.
         return userpage(value)

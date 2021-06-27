@@ -3,6 +3,7 @@ import os
 import json
 import sys
 
+import matplotlib.pyplot as plt
 from scipy.signal import medfilt
 
 from poses import PoseSequence
@@ -91,7 +92,7 @@ def DTWDistance(s1, s2):
 
     return np.sqrt(DTW[len(s1) - 1, len(s2) - 1])
 
-def load_features(names, exercise='bicep', data=None, side=None, bool_val=False):
+def load_features(names, exercise='Bicep Curl', data=None, side=None, bool_val=False):
     """
     Given
     Side --> encoded as left or right from user uploaded videos (without confidence encoded)
@@ -162,16 +163,16 @@ def load_features(names, exercise='bicep', data=None, side=None, bool_val=False)
             medfilt(upper_arm_forearm_angle, 5), 5
         )  # size 5 median filter twice
 
-        if exercise == "shoulderpress":
+        if exercise == "Shoulder Press":
             output1.append(back_vec.tolist())
             output2.append(upper_arm_forearm_angle_filtered.tolist())
 
-        if (exercise == "bicep") or (exercise == "frontraise"):
+        if (exercise == "Bicep Curl") or (exercise == "Front Raise"):
             output1.append(upper_arm_torso_angle_filtered.tolist())
             output2.append(upper_arm_forearm_angle_filtered.tolist())
     return output1, output2
 
-def kmeans_test(names, X_train_1, X_train_2, y_train, data=None, side=None, bool_val=False, exercise="bicep"):
+def kmeans_test(names, X_train_1, X_train_2, y_train, data=None, side=None, bool_val=False, exercise="Bicep Curl"):
     if not bool_val:
         X_test_1, X_test_2 = load_features(names, exercise=exercise)
     else:
@@ -206,6 +207,15 @@ def kmeans_test(names, X_train_1, X_train_2, y_train, data=None, side=None, bool
         f2_good = f2_good[good_idx_sort]
         f1_bad = f1_bad[bad_idx_sort]
         f2_bad = f2_bad[bad_idx_sort]
+        
+        # Plotting points
+        plt.scatter(f1_good, f2_good, label='Distance to Good Form Ex.')
+        plt.scatter(f1_bad, f2_bad, label='Distance to Bad Form Ex.')
+        plt.xlabel("Distance using Upper Arm Torso Angle (in Degrees)")
+        plt.ylabel("Distance using Upper Arm Forearm Angle (in Degrees)")
+        plt.title(f"Distance between {names[example]} and Good/Bad Examples")
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
+        plt.savefig('image.jpg', bbox_inches="tight")
 
         good_score = np.mean(f1_good) + np.mean(f2_good)
         bad_score = np.mean(f1_bad) + np.mean(f2_bad)
@@ -239,11 +249,5 @@ if __name__ == "__main__":
     #new_data = load_tester('moh_bicep_curl_ex.json')
     
     X_train_1, X_train_2 = load_features(X_train_names)
-    
-    """# adding new data
-    inp_seq_1, inp_seq_2 = load_features(['demo'], new_data, side, bool_val=True)
-    X_train_1.append(inp_seq_1[0])
-    X_train_2.append(inp_seq_2[0])
-    y_train = np.append(y_train, 1)"""
-    
+
     print(kmeans_test(['demo'], X_train_1=X_train_1, X_train_2=X_train_2, y_train=y_train, data=data, side=side, bool_val=True, exercise=exercise))

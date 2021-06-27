@@ -4,14 +4,88 @@
   <title>Video Example</title>
 </head>
 <body>
-  <h2>Example Video and Body Points</h2>
-  <video width="320" height="240" controls>
-    <source src={{ url_for('static', filename="https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/shiqi_raisearms.mp4") }} type="video/mp4">
+  <h2>Welcome {{  name  }}</h2>
+  <h2 style=text-align:left;><a href="{{ url_for('upload') }}">Upload</a></h2>
+  <h2>Upload a video to your personalized AI Feedback</h2>
+  <video width="320" height="240" controls autoplay muted>
+    <source src="https://swolemate-s3.s3.us-west-2.amazonaws.com/shiqi_raisearms.mp4" type="video/mp4">
     Your browser does not support the video tag.
   </video>
-  <h2>Example Graph</h2>
-  <img src="image.jpg" alt="my plot">
+  <video width="320" height="240" controls autoplay muted>
+    <source src="https://swolemate-s3.s3.us-west-2.amazonaws.com/input.mp4" type="video/mp4">
+    Your browser does not support the video tag.
+  </video>
+ 
+ <h2>Example Graph</h2>
+  <img src="../image.jpg" alt="my plot">
+
+  <!-- {% block content %} -->
+  <div class="container">
+  
+      <h3>List Files</h3>
+      <table class="table table-hover">
+        <thead class="thead-dark">
+          <tr>
+            <th scope="col">File Name</th>
+            <th scope="col">Time </th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for item in items %}
+        <tr>
+  
+          <td>  <a href = "/download/{{ item[0] }}">{{ item[0] }} </a> </td>
+          <td> {{ item[1] }} </td>
+        </tr>
+        {% endfor %}
+          
+        </tbody>
+      </table>
+      <br/>
+  </div> <!-- /container -->
+    
+<div class="slidecontainer">
+  <p>How Good/Bad is Your Form?</p>
+  <input type="range" min="-100" max="100" value={{value}} class="slider" id="myRange">
+</div>
+<style>
+    .slidecontainer {
+      width: 100%; /* Width of the outside container */
+    }
+    
+    
+
+    /* The slider itself */
+    .slider {
+      -webkit-appearance: none;  /* Override default CSS styles */
+      appearance: none;
+      width: 100%; /* Full-width */
+      height: 25px; /* Specified height */
+      background: #d3d3d3; /* Grey background */
+      outline: none; /* Remove outline */
+      opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+      -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+      transition: opacity .2s;
+    }
+
+    </style>
+<script>
+    var slider = document.getElementById("myRange");
+    var output = document.getElementById("demo");
+    output.innerHTML = slider.value; // Display the default slider value
+
+    // Update the current slider value (each time you drag the slider handle)
+    slider.oninput = function() {
+      output.innerHTML = this.value;
+    }
+    </script>
     <h2>Percentage Numerical Value</h2>
     {{value}}
+  
+  <!-- {% endblock %} -->
+
+  <!-- <h2>Example Graph</h2>
+  <img src="/plot.png" alt="my plot"> -->
+
 </body>
 </html>
