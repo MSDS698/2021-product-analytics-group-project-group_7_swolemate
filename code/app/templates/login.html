@@ -1,6 +1,11 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% extends "bootstrap/base.html" %}
 
+{% block head %}
+{{ super() }}
+{% include "ga.html" %}
+{% endblock %}
+
 {% block title %}
 Login
 {% endblock %}

@@ -1,5 +1,10 @@
 {% extends "base.html" %} 
 
+{% block head %}
+{{ super() }}
+{% include "ga.html" %}
+{% endblock %}
+
 {% block content %}
 
         <!-- Image Showcases-->
