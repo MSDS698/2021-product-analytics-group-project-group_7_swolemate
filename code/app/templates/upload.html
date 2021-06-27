@@ -1,12 +1,22 @@
+{% import "bootstrap/wtf.html" as wtf %}
+{% extends "bootstrap/base.html" %}
+
+{% block title %}
+File Upload
+{% endblock %}
+
+
+{% block content %}
 <div class="container">
-    <form method="POST" enctype="multipart/form-data"> <!-- post : handle submission -->
-        <h2>File Upload</h2>
-        {{ form.csrf_token }} <!--  render the form's CSRF field like normal. -->
-        {{ form.file_selector }}
-        <br/>
-        {{ form.selection }}
-        <br/>
-        {{ form.submit }}
+    <form method="POST">
+        <h2>Login</h2>
+        {{ form.hidden_tag() }}
+        {{ wtf.form_field(form.file_selector) }}
+        {{ wtf.form_field(form.selection) }}
+        <center> {{ wtf.form_field(form.submit)}} </center>
     </form>
+</br>
+<center> upload your video </a> </center>
 </div> <!-- /container -->
+{% endblock %}
 
