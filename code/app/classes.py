@@ -25,7 +25,7 @@ authors = [{'name':'Kexin Wang','position':'CEO','linkedin':'https://www.linkedi
 {'name':'Wenyao Zhang', 'position':'Data Scientist', 'linkedin':'https://www.linkedin.com/in/wenyao-zhang/','pic':'https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/images/headshots/wenyao-zhang.jpg?itok=Y09MBXza'}]
 
 WORKOUT_CHOICES = [('1','Bicep Curl'),('2', 'Front Raise'), ('3', 'Shoulder Press')] # choose the exercise
-SIDE_CHOICES = [('1', 'left'),('2', 'right')] # choose what side you are facing relative to the camera
+SIDE_CHOICES = [('1', 'Left'),('2', 'Right')] # choose what side you are facing relative to the camera
 
 class UploadFileForm(FlaskForm):
     """Class for uploading file when submitted"""
@@ -34,7 +34,7 @@ class UploadFileForm(FlaskForm):
         FileRequired(),
         FileAllowed(['mp4'], 'mp4 video only'),
     ])
-    exercise_selection = SelectField('Workout_Name', choices=WORKOUT_CHOICES)
+    exercise_selection = SelectField('Workout Name', choices=WORKOUT_CHOICES)
     side_selection = SelectField('Side Faced Relative to the Camera', choices=SIDE_CHOICES)
     submit = SubmitField('Submit')
 

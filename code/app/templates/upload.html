@@ -12,7 +12,8 @@ File Upload
         <h2>Login</h2>
         {{ form.hidden_tag() }}
         {{ wtf.form_field(form.file_selector) }}
-        {{ wtf.form_field(form.selection) }}
+        {{ wtf.form_field(form.exercise_selection) }}
+        {{ wtf.form_field(form.side_selection) }}
         <center> {{ wtf.form_field(form.submit)}} </center>
     </form>
 </br>
