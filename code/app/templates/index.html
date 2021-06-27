@@ -1,21 +1,162 @@
-<html>
-    <link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet'>
-    <h1 style="color:#B1531A;font-size:300%; font-family: 'Oswald';text-align:center;">Swolemate</h1>
-    <h2 style=text-align:center;><a href="{{ url_for('team') }}">Team</a></h2>
-    <h2 style=text-align:center;><a href="{{ url_for('upload') }}">Upload</a></h2>
-    <h2 style=text-align:center;><a href="{{ url_for('register') }}">Register Here</a></h2>
-    <h2 style=text-align:center;><a href="{{ url_for('login') }}">Log In</a></h2>
-    <p style=text-align:center;>
-        Evaluate your workout form wherever you are
-    </p>
+{% extends "base.html" %} 
 
-    <table>
-        {% for i in images %}
-        <tr>
-            <td align=center width="80"><img src={{ i['image'] }}></td>
-            <td>{{  i['text']  }}</td>
-            </td>
-        </tr>
-        {% endfor %}
+{% block content %}
 
-</html>
+        <!-- Image Showcases-->
+        <section class="showcase">
+            <div class="container-fluid p-0">
+                <div class="row g-0">
+
+                    <div class="col-lg-6 order-lg-2 text-white showcase-img" style="background-image:url('{{ url_for('static', filename='assets/logo.png') }}'); height:400px"></div>
+
+                    <div class="col-lg-6 order-lg-1 my-auto showcase-text">
+                        <h1>Hi, we are Swolemate. </h1>
+                        <p class="lead mb-0">Hollywood level training in the comfort of your home.</p>
+
+
+                    </div>
+                </div>
+                <div class="row g-0">
+                    <div class="col-lg-7 text-white showcase-img" style="background-image:url('{{ url_for('static', filename='assets/home.jpeg') }}'); height:400px"></div>
+
+                    <div class="col-lg-5 my-auto showcase-text">
+                        <h2>We get it.</h2>
+			<h2>Personal trainers are expensive.</h2>
+			<h2>Gyms can be intimidating.</h2>
+
+                    </div>
+
+
+                </div>
+                <div class="row g-0">
+                    <div class="col-lg-7 order-lg-2 text-white showcase-img" style="background-image:url('{{ url_for('static', filename='assets/workout.jpeg') }}'); height:400px"></div>
+
+                    <div class="col-lg-5 order-lg-1 my-auto showcase-text">
+                        <h2>Let us be the solution.</h2>
+                        <p class="lead mb-0">Turn on your camera and follow along with one of our expert led workouts, and then get immediate feedback on your performance. </p>
+                        <p class="lead mb-0">Convenient, simple, and fun. </p>
+                    </div>
+
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Testimonials 1 of 3-->
+        <section class="testimonials text-center bg-light">
+            <div class="container">
+                <h2 class="mb-5">Meet the team!</h2>
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="testimonial-item mx-auto mb-5 mb-lg-0">
+
+                            <img class="img-fluid rounded-circle mb-3" src="{{ url_for('static', filename='assets/img/kexin.jpg') }}" alt="..." />
+                            <h5>Kexin</h5>
+                            <p class="font-weight-light mb-0">CEO</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="testimonial-item mx-auto mb-5 mb-lg-0">
+
+                            <img class="img-fluid rounded-circle mb-3" src="static/assets/img/danny.jpg" alt="..." />
+                            <h5>Daniel</h5>
+                            <p class="font-weight-light mb-0">CTO</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="testimonial-item mx-auto mb-5 mb-lg-0">
+
+                            <img class="img-fluid rounded-circle mb-3" src="static/assets/img/boliang.jpg" alt="..." />
+                            <h5>Boliang</h5>
+
+                            <p class="font-weight-light mb-0">"Engineer"</p>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Testimonials 2 of 3-->
+        <section class="testimonials text-center bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="testimonial-item mx-auto mb-5 mb-lg-0">
+
+                            <img class="img-fluid rounded-circle mb-3" src="{{ url_for('static', filename='assets/img/moh_moh.jpg') }}" alt="..." />
+                            <h5>Moh Moh</h5>
+                            <p class="font-weight-light mb-0">Data Scientist</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="testimonial-item mx-auto mb-5 mb-lg-0">
+
+                            <img class="img-fluid rounded-circle mb-3" src="static/assets/img/kris.jpg" alt="..." />
+                            <h5>Kris</h5>
+                            <p class="font-weight-light mb-0">Engineer</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="testimonial-item mx-auto mb-5 mb-lg-0">
+
+                            <img class="img-fluid rounded-circle mb-3" src="static/assets/img/elyse.jpg" alt="..." />
+                            <h5>Elyse</h5>
+
+                            <p class="font-weight-light mb-0">Data Scientist</p>
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials 3 of 3-->
+        <section class="testimonials text-center bg-light">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="testimonial-item mx-auto mb-5 mb-lg-0">
+
+                            <img class="img-fluid rounded-circle mb-3" src="{{ url_for('static', filename='assets/img/suren.jpg') }}" alt="..." />
+                            <h5>Suren</h5>
+                            <p class="font-weight-light mb-0">Engineer</p>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="testimonial-item mx-auto mb-5 mb-lg-0">
+
+                            <img class="img-fluid rounded-circle mb-3" src="static/assets/img/wenyao.jpg" alt="..." />
+                            <h5>Wenyao</h5>
+                            <p class="font-weight-light mb-0">Engineer</p>
+                        </div>
+                    </div>
+                                    </div>
+            </div>
+        </section>
+
+
+
+        <!-- Call to Action-->
+        <section class="call-to-action text-white text-center" id="signup">
+            <div class="container position-relative">
+                <div class="row justify-content-center">
+                    <div class="col-xl-6">
+                        <h2 class="mb-4">Ready to get started? Sign up now!</h2>
+                        <!-- Signup form-->
+                        <form>
+                            <div class="input-group input-group-lg">
+                                <input class="form-control" type="text" placeholder="Enter your email..." aria-label="Enter your email..." aria-describedby="button-submit" />
+                                <button class="btn btn-primary" id="button-submit" type="button">Sign up!</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+{%endblock%}
