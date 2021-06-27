@@ -36,47 +36,38 @@ def team():
 
 @application.route('/upload', methods=['GET', 'POST'])
 def upload():
-    bucket_name = "msds603-swolemate-s3"
-    aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
-    aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
-    # s3_location = 'http://{}.s3.amazonaws.com/'.format(bucket_name)
-    s3_location = 'https://s3.console.aws.amazon.com/s3/buckets/msds603-swolemate-s3'
-    # print(aws_access_key_id)
-    # print(aws_secret_access_key)
+    bucket_name = "swolemate-s3"
+    s3_location = 'https://s3.console.aws.amazon.com/s3/buckets/swolemate-s3'
 
     """upload a file from a client machine."""
     file = classes.UploadFileForm()  # file : UploadFileForm class instance
     if file.validate_on_submit():  # Check it's a POST request that's valid
         f = file.file_selector.data  # f : Data of FileField
-        filename = secure_filename(f.filename)
-        f.save(os.path.join(
-            'videos', filename
-        ))
+        filename = f.filename
+        # filename = secure_filename(f.filename)
+        # f.save(os.path.join(
+        #     'videos', filename
+        # ))
 
-        items = filename.split('.')
-        subprocess.run([
-            'python3', 'detectron2_repo/demo/demo.py',
-            '--config-file', 'detectron2_repo/configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml',
-            '--video-input', 'videos/' + filename,
-            '--output', 'output/' + items[0] + '.json',
-            '--opts',
-            'MODEL.WEIGHTS', 'detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl',
-            'MODEL.DEVICE', 'cpu',
-        ])
+        # items = filename.split('.')
+        # subprocess.run([
+        #     'python3', 'detectron2_repo/demo/demo.py',
+        #     '--config-file', 'detectron2_repo/configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml',
+        #     '--video-input', 'videos/' + filename,
+        #     '--output', 'output/' + items[0] + '.json',
+        #     '--opts',
+        #     'MODEL.WEIGHTS', 'detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl',
+        #     'MODEL.DEVICE', 'cpu',
+        # ])
         
+        session = boto3.Session()
         
-
-        # session = boto3.Session(
-        #         aws_access_key_id=aws_access_key_id,
-        #         aws_secret_access_key=aws_secret_access_key
-        #         )
-        #
-        # session.resource("s3")\
-        #     .Bucket(bucket_name)\
-        #     .put_object(Key=filename, Body=f, ACL='public-read-write')
-        #
-        # uploaded_file = 'https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
-        # print(uploaded_file)
+        session.resource("s3")\
+            .Bucket(bucket_name)\
+            .put_object(Key=filename, Body=f, ACL='public-read-write')
+        
+        uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
+        print(uploaded_file)
 
         return redirect(url_for('userpage'))  # Redirect to / (/index) page.
     return render_template('upload.html', form=file)
