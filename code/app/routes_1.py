@@ -2,43 +2,32 @@ from app import application, classes, db
 from flask import render_template, redirect, url_for, Response
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
-from utils import *
 from wtforms import SubmitField
 from werkzeug.utils import secure_filename
 import os
-import subprocess
 import boto3
+import subprocess
 import io
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from flask_login import current_user, login_user, login_required, logout_user
 
 
-#docker run --rm -it -p 5000:5000 zwy8203302/app:v0 bash
-
-
-
-
 @application.route('/index')
 @application.route('/')
 def index():
-    """Index Page : Renders index.html with author name."""
-    images = [{'text': 'Good Form', 'image': 'https://images.pexels.com/photos/176782/pexels-photo-176782.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500'},
-              {'text': 'User Input', 'image': 'https://images.pexels.com/photos/176782/pexels-photo-176782.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500'}]
-    return (render_template('index.html', images=images))
+    """Index Page : Renders index.html"""
+    return (render_template('index.html'))
 
 
-@application.route('/team')
-def team():
-    """Index Page : Renders index.html with author name."""
-    # return ("<h1> Hello World </h1>")
-    authors = ['Boliang Liu', 'Daniel Carrera', 'Elyse Cheung-Sutton',
-               'Kris Johnson', 'Kexin Wang', 'Moh Kaddoura',
-               'Suren Gunturu', 'Wenyao Zhang']
-    return (render_template('team.html', authors=authors))
+# @application.route('/team')
+# def team():
+#     """Index Page : Renders index.html with author name."""
+#     return (render_template('team.html', authors=classes.authors))
 
 
 @application.route('/upload', methods=['GET', 'POST'])
+@login_required
 def upload():
     bucket_name = "swolemate-s3"
     s3_location = 'https://s3.console.aws.amazon.com/s3/buckets/swolemate-s3'
@@ -46,15 +35,13 @@ def upload():
     """upload a file from a client machine."""
     file = classes.UploadFileForm()  # file : UploadFileForm class instance
     if file.validate_on_submit():  # Check it's a POST request that's valid
-        workout_type = dict(classes.WORKOUT_CHOICES).get(file.exercise_selection.data)
-        side = dict(classes.SIDE_CHOICES).get(file.side_selection.data)
-        
+        workout_type = dict(classes.WORKOUT_CHOICES).get(file.selection.data)
         f = file.file_selector.data  # f : Data of FileField
         filename = secure_filename(f.filename)
         f.save(os.path.join(
             'videos', filename
-        ))
-
+        ))        
+        
         items = filename.split('.')
         subprocess.run([
             'python3', 'detectron2_repo/demo/demo.py',
@@ -65,37 +52,19 @@ def upload():
             'MODEL.WEIGHTS', 'detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl',
             'MODEL.DEVICE', 'cpu',
         ])
-        
-        json_file_name = 'output/' + items[0] + '.json'
-    
-        data = load_tester(json_file_name)
-        
-        X_train_names = files_in_order('poses_compressed/bicep')
-        y_train = get_labels(X_train_names)
 
-        X_train_1, X_train_2 = load_features(X_train_names)
+        session = boto3.Session()
 
-        value, _, _ = kmeans_test(['demo'], X_train_1=X_train_1, X_train_2=X_train_2, y_train=y_train, data=data, side=side, bool_val=True, exercise=workout_type)
-
-        """session = boto3.Session(
-                 aws_access_key_id=aws_access_key_id,
-                 aws_secret_access_key=aws_secret_access_key
-                 )
-        
         session.resource("s3")\
-         .Bucket(bucket_name)\
-         .put_object(Key=filename, Body=f, ACL='public-read-write')
-        
-        uploaded_file = 'https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
-        print(uploaded_file)"""
+            .Bucket(bucket_name)\
+            .put_object(Key=filename, Body=f, ACL='public-read-write')
 
-        #return redirect(url_for('userpage', value=value))  # Redirect to / (/index) page.
-        return userpage(value)
+        uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
+        #print(uploaded_file)
+
+        return redirect(url_for('userpage'))  # Redirect to / (/index) page.
     return render_template('upload.html', form=file)
 
-
-
-# update :  log in & log out
 
 @application.route('/register',  methods=('GET', 'POST'))
 def register():
@@ -106,7 +75,7 @@ def register():
         email = registration_form.email.data
 
         user_count = classes.User.query.filter_by(username=username).count() \
-                     + classes.User.query.filter_by(email=email).count()
+            + classes.User.query.filter_by(email=email).count()
         if (user_count > 0):
             return '<h1>Error - Existing user : ' + username \
                    + ' OR ' + email + '</h1>'
@@ -114,7 +83,7 @@ def register():
             user = classes.User(username, email, password)
             db.session.add(user)
             db.session.commit()
-            return redirect(url_for('index'))
+            return redirect(url_for('login'))
     return render_template('register.html', form=registration_form)
 
 
@@ -148,17 +117,25 @@ def logout():
                    + str(current_user.is_authenticated) + '</h1>'
     return before_logout + after_logout
 
-#@application.route('/plot.png')
-#def plot_png():
-#    fig = classes.create_figure()
-#    output = io.BytesIO()
-#    FigureCanvas(fig).print_png(output)
-#    return Response(output.getvalue(), mimetype='image/png')
-#
-    
-@application.route('/userpage')
-def userpage(value):
-    # Show Shiqi vid
-    plot_file = 'image.jpg'
-    # Graph hip points
-    return render_template('userpage.html', value=value)
+
+@application.route('/plot.png')
+def plot_png():
+    fig = classes.create_figure()
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
+
+
+@application.route('/userpage', methods=['GET', 'POST'])
+@login_required
+def userpage():
+    bucket_name = "msds603-swolemate-s3"
+    s3 = boto3.resource('s3')
+    my_bucket = s3.Bucket(bucket_name)
+    unsorted_keys = []
+
+    for object_summary in my_bucket.objects.filter():
+        unsorted_keys.append([object_summary.key,
+                              object_summary.last_modified.strftime("%Y-%m-%d %H:%M:%S")])
+
+    return render_template('userpage.html', name=current_user.username, items=unsorted_keys)

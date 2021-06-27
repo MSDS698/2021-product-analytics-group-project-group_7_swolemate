@@ -11,4 +11,3 @@ services:
 
 networks:
    swole_net:
-

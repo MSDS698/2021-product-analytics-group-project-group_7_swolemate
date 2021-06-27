@@ -2,8 +2,11 @@ from flask_wtf import FlaskForm
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
-from wtforms import PasswordField, StringField, SubmitField, SelectField
-from wtforms.validators import DataRequired
+
+from wtforms import PasswordField, StringField, SubmitField, RadioField
+from wtforms import IntegerField, SelectField, FloatField, DateTimeField, BooleanField
+from wtforms.validators import DataRequired, Optional
+
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -11,7 +14,6 @@ import matplotlib.pyplot as plt
 import requests
 
 from app import db, login_manager
-
 
 authors = [{'name':'Kexin Wang','position':'CEO','linkedin':'https://www.linkedin.com/in/sheena-kexin-wang-3a51b7170/', 'pic':'https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/pic1_-_kexin_wang.jpg?itok=Sx5fOi-S'},
 {'name':'Daniel Carrera', 'position':'CTO','linkedin':'https://www.linkedin.com/in/daniel-carrera/','pic':'https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/catalog/arts_and_sciences/img_3126_-_daniel_carrera.jpg?itok=V2Fpl961'}, 
