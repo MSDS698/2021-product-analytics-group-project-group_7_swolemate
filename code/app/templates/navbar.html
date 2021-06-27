@@ -1,0 +1,38 @@
+<nav class="navbar navbar-light bg-light static-top">
+    <div class="container">
+
+        <a class="navbar-brand" href="/">Swolemate</a>
+
+        <ul class="nav-item">
+          <a class="nav-link" href="/#about">About</a>
+        </ul>
+
+        <ul class="nav-item">
+          <a class="nav-link" href="/#team">Team</a>
+        </ul>
+
+        {% if not authenticated_user %}
+
+        <ul class="nav-item">
+          <a class="nav-link" href="/login">Log in</a>
+        </ul>
+
+        <ul class="nav-item">
+          <a class="nav-link" href="/register">Register</a>
+        </ul>
+
+        {% elif authenticated_user %}
+
+        <ul class="nav-item">
+          <a class="nav-link" href="/upload">Upload</a>
+        </ul>
+
+        <ul class="nav-item">
+          <a class="nav-link" href="/logout">Log out</a>
+        </ul>
+
+        {% endif %}
+
+
+    </div>
+</nav>
