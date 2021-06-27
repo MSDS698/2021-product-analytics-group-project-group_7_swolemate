@@ -41,16 +41,6 @@ def upload():
         f = file.file_selector.data  # f : Data of FileField
         filename = secure_filename(f.filename)
         
-        session = boto3.Session()
-
-        session.resource("s3")\
-            .Bucket(bucket_name)\
-            .put_object(Key=filename, Body=f, ACL='public-read-write')
-
-        uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
-        print(uploaded_file)
-        
-        
         f.save(os.path.join(
             'videos', filename
         ))        
@@ -64,8 +54,13 @@ def upload():
             'MODEL.WEIGHTS', 'detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl',
             'MODEL.DEVICE', 'cpu',
         ])
-                
-
+        
+        session = boto3.Session()
+        session.resource("s3")\
+            .Bucket(bucket_name)\
+            .put_object(Key=filename, Body=os.path.join('videos', filename), ACL='public-read-write')
+        uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
+        print(uploaded_file)
 
         return redirect(url_for('userpage'))  # Redirect to / (/index) page.
     return render_template('upload.html', form=file)
