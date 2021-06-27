@@ -3,6 +3,7 @@ import os
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_bootstrap import Bootstrap
 
 # Initialization
 # Create an application instance, handles all requests.
@@ -19,6 +20,7 @@ db.session.commit()
 login_manager = LoginManager()
 login_manager.init_app(application)
 
+bootstrap = Bootstrap(application)
 
 # routes.py needs to import "application" variable in __init__.py - breaks PEP8
 from app import classes

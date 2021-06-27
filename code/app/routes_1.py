@@ -41,6 +41,7 @@ def upload():
         f.save(os.path.join(
             'videos', filename
         ))        
+        
         items = filename.split('.')
         subprocess.run([
             'python3', 'detectron2_repo/demo/demo.py',
@@ -52,13 +53,13 @@ def upload():
             'MODEL.DEVICE', 'cpu',
         ])
 
-        #session = boto3.Session()
-#
-        #session.resource("s3")\
-        #    .Bucket(bucket_name)\
-        #    .put_object(Key=filename, Body=f, ACL='public-read-write')
-#
-        #uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
+        session = boto3.Session()
+
+        session.resource("s3")\
+            .Bucket(bucket_name)\
+            .put_object(Key=filename, Body=f, ACL='public-read-write')
+
+        uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
         #print(uploaded_file)
 
         return redirect(url_for('userpage'))  # Redirect to / (/index) page.
@@ -68,15 +69,10 @@ def upload():
 @application.route('/register',  methods=('GET', 'POST'))
 def register():
     registration_form = classes.RegistrationForm()
-    #if registration_form.validate_on_submit():
-    #    username = registration_form.username.data
-    #    password = registration_form.password.data
-    #    email = registration_form.email.data
     if registration_form.validate_on_submit():
         username = registration_form.username.data
-        email = registration_form.email.data
         password = registration_form.password.data
-
+        email = registration_form.email.data
 
         user_count = classes.User.query.filter_by(username=username).count() \
             + classes.User.query.filter_by(email=email).count()
@@ -133,13 +129,13 @@ def plot_png():
 @application.route('/userpage', methods=['GET', 'POST'])
 @login_required
 def userpage():
-    #bucket_name = "msds603-swolemate-s3"
-    #s3 = boto3.resource('s3')
-    #my_bucket = s3.Bucket(bucket_name)
-    unsorted_keys = [[1, '333']]
+    bucket_name = "msds603-swolemate-s3"
+    s3 = boto3.resource('s3')
+    my_bucket = s3.Bucket(bucket_name)
+    unsorted_keys = []
 
-    #for object_summary in my_bucket.objects.filter():
-    #    unsorted_keys.append([object_summary.key,
-    #                          object_summary.last_modified.strftime("%Y-%m-%d %H:%M:%S")])
-#
+    for object_summary in my_bucket.objects.filter():
+        unsorted_keys.append([object_summary.key,
+                              object_summary.last_modified.strftime("%Y-%m-%d %H:%M:%S")])
+
     return render_template('userpage.html', name=current_user.username, items=unsorted_keys)

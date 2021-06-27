@@ -2,8 +2,11 @@ from flask_wtf import FlaskForm
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
-from wtforms import PasswordField, StringField, SubmitField, SelectField
-from wtforms.validators import DataRequired
+
+from wtforms import PasswordField, StringField, SubmitField, RadioField
+from wtforms import IntegerField, SelectField, FloatField, DateTimeField, BooleanField
+from wtforms.validators import DataRequired, Optional
+
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -50,11 +53,15 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+
 class RegistrationForm(FlaskForm):
     username = StringField('Username:', validators=[DataRequired()])
     email = StringField('Email:', validators=[DataRequired()])
     password = PasswordField('Password:', validators=[DataRequired()])
     submit = SubmitField('Submit')
+
+
+
 
 class LogInForm(FlaskForm):
     username = StringField('Username:', validators=[DataRequired()])
