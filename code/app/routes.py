@@ -37,7 +37,7 @@ def upload():
     """upload a file from a client machine."""
     file = classes.UploadFileForm()  # file : UploadFileForm class instance
     if file.validate_on_submit():  # Check it's a POST request that's valid
-        workout_type = dict(classes.WORKOUT_CHOICES).get(file.selection.data)
+        workout_type = dict(classes.WORKOUT_CHOICES).get(file.exercise_selection.data)
         side = dict(classes.SIDE_CHOICES).get(file.side_selection.data)
         
         f = file.file_selector.data  # f : Data of FileField
