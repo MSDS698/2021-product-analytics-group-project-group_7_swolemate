@@ -2,6 +2,7 @@ from app import application, classes, db
 from flask import render_template, redirect, url_for, Response
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
+from utils import *
 from wtforms import SubmitField
 from werkzeug.utils import secure_filename
 import os
@@ -12,6 +13,7 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from flask_login import current_user, login_user, login_required, logout_user
 
+#docker run --rm -it -p 5000:5000 zwy8203302/app:v0 bash
 
 @application.route('/index')
 @application.route('/')
@@ -36,21 +38,36 @@ def upload():
     file = classes.UploadFileForm()  # file : UploadFileForm class instance
     if file.validate_on_submit():  # Check it's a POST request that's valid
         workout_type = dict(classes.WORKOUT_CHOICES).get(file.selection.data)
+        side = dict(classes.SIDE_CHOICES).get(file.side_selection.data)
+        
         f = file.file_selector.data  # f : Data of FileField
         filename = secure_filename(f.filename)
-       #f.save(os.path.join(
-       #    'videos', filename
-       #))        
-       #items = filename.split('.')
-       #subprocess.run([
-       #    'python3', 'detectron2_repo/demo/demo.py',
-       #    '--config-file', 'detectron2_repo/configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml',
-       #    '--video-input', 'videos/' + filename,
-       #    '--output', 'output/' + items[0] + '.json',
-       #    '--opts',
-       #    'MODEL.WEIGHTS', 'detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl',
-       #    'MODEL.DEVICE', 'cpu',
-       #])
+        f.save(os.path.join(
+            'videos', filename
+        ))     
+
+        items = filename.split('.')
+        subprocess.run([
+            'python3', 'detectron2_repo/demo/demo.py',
+            '--config-file', 'detectron2_repo/configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml',
+            '--video-input', 'videos/' + filename,
+            '--output', 'output/' + items[0] + '.json',
+            '--opts',
+            'MODEL.WEIGHTS', 'detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl',
+            'MODEL.DEVICE', 'cpu',
+        ])
+
+        json_file_name = 'output/' + items[0] + '.json'
+    
+        data = load_tester(json_file_name)
+        
+        X_train_names = files_in_order('poses_compressed/bicep')
+        y_train = get_labels(X_train_names)
+
+        X_train_1, X_train_2 = load_features(X_train_names)
+
+        value, _, _ = kmeans_test(['demo'], X_train_1=X_train_1, X_train_2=X_train_2, y_train=y_train, data=data, side=side, bool_val=True, exercise=workout_type)
+
 
         session = boto3.Session()
 
