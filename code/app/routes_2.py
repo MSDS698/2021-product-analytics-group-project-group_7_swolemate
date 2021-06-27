@@ -2,7 +2,7 @@ from app import application, classes, db
 from flask import render_template, redirect, url_for, Response
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
-from evaluation_bicep import *
+from utils import *
 from wtforms import SubmitField
 from werkzeug.utils import secure_filename
 import os
@@ -78,8 +78,7 @@ def upload():
         X_train_1, X_train_2 = load_features(X_train_names)
         side = 'right'
 
-        value, _, _ = Kmeans_test(['demo'], X_train_1, X_train_2, y_train, data, side, True)
-        value = str(round(value, 2)) + "%"
+        value, _, _ = kmeans_test(['demo'], X_train_1=X_train_1, X_train_2=X_train_2, y_train=y_train, data=data, side=side, bool_val=True, exercise='bicep')
 
         # session = boto3.Session(
         #         aws_access_key_id=aws_access_key_id,
