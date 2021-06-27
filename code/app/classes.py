@@ -2,8 +2,11 @@ from flask_wtf import FlaskForm
 from flask_login import UserMixin
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
-from wtforms import PasswordField, StringField, SubmitField, SelectField
-from wtforms.validators import DataRequired
+
+from wtforms import PasswordField, StringField, SubmitField, RadioField
+from wtforms import IntegerField, SelectField, FloatField, DateTimeField, BooleanField
+from wtforms.validators import DataRequired, Optional
+
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -11,7 +14,6 @@ import matplotlib.pyplot as plt
 import requests
 
 from app import db, login_manager
-
 
 authors = [{'name':'Kexin Wang','position':'CEO','linkedin':'https://www.linkedin.com/in/sheena-kexin-wang-3a51b7170/', 'pic':'https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/pic1_-_kexin_wang.jpg?itok=Sx5fOi-S'},
 {'name':'Daniel Carrera', 'position':'CTO','linkedin':'https://www.linkedin.com/in/daniel-carrera/','pic':'https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/catalog/arts_and_sciences/img_3126_-_daniel_carrera.jpg?itok=V2Fpl961'}, 
@@ -23,7 +25,7 @@ authors = [{'name':'Kexin Wang','position':'CEO','linkedin':'https://www.linkedi
 {'name':'Wenyao Zhang', 'position':'Data Scientist', 'linkedin':'https://www.linkedin.com/in/wenyao-zhang/','pic':'https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/images/headshots/wenyao-zhang.jpg?itok=Y09MBXza'}]
 
 WORKOUT_CHOICES = [('1','Bicep Curl'),('2', 'Front Raise'), ('3', 'Shoulder Press')] # choose the exercise
-SIDE_CHOICES = [('1', 'left'),('2', 'right')] # choose what side you are facing relative to the camera
+SIDE_CHOICES = [('1', 'Left'),('2', 'Right')] # choose what side you are facing relative to the camera
 
 class UploadFileForm(FlaskForm):
     """Class for uploading file when submitted"""
@@ -32,7 +34,7 @@ class UploadFileForm(FlaskForm):
         FileRequired(),
         FileAllowed(['mp4'], 'mp4 video only'),
     ])
-    exercise_selection = SelectField('Workout_Name', choices=WORKOUT_CHOICES)
+    exercise_selection = SelectField('Workout Name', choices=WORKOUT_CHOICES)
     side_selection = SelectField('Side Faced Relative to the Camera', choices=SIDE_CHOICES)
     submit = SubmitField('Submit')
 

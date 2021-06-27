@@ -9,11 +9,5 @@ app.routes\_2 module
    :undoc-members:
    :show-inheritance:
 
-demo module
-===========
 
-.. automodule:: demo
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
