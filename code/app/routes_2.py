@@ -2,6 +2,7 @@ from app import application, classes, db
 from flask import render_template, redirect, url_for, Response
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
+from evaluation_bicep import *
 from wtforms import SubmitField
 from werkzeug.utils import secure_filename
 import os
@@ -11,6 +12,9 @@ import io
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from flask_login import current_user, login_user, login_required, logout_user
+
+
+#docker run --rm -it -p 5000:5000 zwy8203302/app:v0 bash
 
 
 
@@ -64,7 +68,18 @@ def upload():
             'MODEL.DEVICE', 'cpu',
         ])
         
+        json_file_name = 'output/' + items[0] + '.json'
+    
+        data = load_tester(json_file_name)
         
+        X_train_names = files_in_order('poses_compressed/bicep')
+        y_train = get_labels(X_train_names)
+
+        X_train_1, X_train_2 = load_features(X_train_names)
+        side = 'right'
+
+        value, _, _ = Kmeans_test(['demo'], X_train_1, X_train_2, y_train, data, side, True)
+        value = str(round(value, 2)) + "%"
 
         # session = boto3.Session(
         #         aws_access_key_id=aws_access_key_id,
@@ -78,7 +93,8 @@ def upload():
         # uploaded_file = 'https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
         # print(uploaded_file)
 
-        return redirect(url_for('userpage'))  # Redirect to / (/index) page.
+        #return redirect(url_for('userpage', value=value))  # Redirect to / (/index) page.
+        return userpage(value)
     return render_template('upload.html', form=file)
 
 
@@ -145,8 +161,8 @@ def logout():
 #
     
 @application.route('/userpage')
-def userpage():
+def userpage(value):
     # Show Shiqi vid
-
+    plot_file = 'image.jpg'
     # Graph hip points
-    return render_template('userpage.html')
+    return render_template('userpage.html', value=value)
