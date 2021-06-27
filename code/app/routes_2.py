@@ -43,22 +43,21 @@ def upload():
     file = classes.UploadFileForm()  # file : UploadFileForm class instance
     if file.validate_on_submit():  # Check it's a POST request that's valid
         f = file.file_selector.data  # f : Data of FileField
-        filename = f.filename
-        # filename = secure_filename(f.filename)
-        # f.save(os.path.join(
-        #     'videos', filename
-        # ))
+        filename = secure_filename(f.filename)
+        f.save(os.path.join(
+            'videos', filename
+        ))
 
-        # items = filename.split('.')
-        # subprocess.run([
-        #     'python3', 'detectron2_repo/demo/demo.py',
-        #     '--config-file', 'detectron2_repo/configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml',
-        #     '--video-input', 'videos/' + filename,
-        #     '--output', 'output/' + items[0] + '.json',
-        #     '--opts',
-        #     'MODEL.WEIGHTS', 'detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl',
-        #     'MODEL.DEVICE', 'cpu',
-        # ])
+        items = filename.split('.')
+        subprocess.run([
+            'python3', 'detectron2_repo/demo/demo.py',
+            '--config-file', 'detectron2_repo/configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml',
+            '--video-input', 'videos/' + filename,
+            '--output', 'output/' + items[0] + '.json',
+            '--opts',
+            'MODEL.WEIGHTS', 'detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl',
+            'MODEL.DEVICE', 'cpu',
+        ])
         
         session = boto3.Session()
         
