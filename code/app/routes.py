@@ -1,5 +1,5 @@
 from app import application, classes, db
-from flask import render_template, redirect, url_for, Response
+from flask import render_template, request, send_file, redirect, url_for, Response
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from wtforms import SubmitField
@@ -61,6 +61,9 @@ def upload():
             .put_object(Key=filename, Body=os.path.join('videos', filename), ACL='public-read-write')
         uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
         print(uploaded_file)
+
+        if request.args.get('debug') != "":
+            return send_file('/app/output/' + items[0] + '.json')
 
         return redirect(url_for('userpage'))  # Redirect to / (/index) page.
     return render_template('upload.html', form=file)
