@@ -93,8 +93,7 @@ def DTWDistance(s1, s2):
 
 def load_features(names, data=None, side=None, bool_val=False, exercise="shoulderpress"):
     """
-
-    Geometric interpretations
+    Given
     Side --> encoded as left or right from user uploaded videos (without confidence encoded)
 
     Args:
@@ -113,7 +112,7 @@ def load_features(names, data=None, side=None, bool_val=False, exercise="shoulde
 
     for filename in names:
         if not bool_val:
-            ps = load_ps("poses_compressed/shoulderpress/" + filename)
+            ps = load_ps(f"poses_compressed/{exercise}/" + filename)
         else:
             ps = PoseSequence(data)
         poses = ps.poses
@@ -150,23 +149,18 @@ def load_features(names, data=None, side=None, bool_val=False, exercise="shoulde
 
         # filter datapoints missing a part
         joints = [joint for joint in joints if all(part.exists for part in joint)]
-        joints_ = np.array(joints)
 
+        # for shoulderpress
         back_vec = np.array([(joint[4].x - joint[3].x, joint[4].y - joint[3].y) for joint in joints])[:, 0]
-
-        elbow, neck = joints_[:, 1], joints_[:, 4]
-        elbow_x = np.array([joint.x for joint in elbow])
-        neck_x = np.array([joint.x for joint in neck])
-
-        arm_vec = elbow_x - neck_x if side == "right" else neck_x - elbow_x
 
         # Shoulder to elbow (upper arm)
         upper_arm_vecs = np.array([(joint[0].x - joint[1].x, joint[0].y - joint[1].y) for joint in joints])
-        # Elbow to wrist (forearm)
+        torso_vecs = np.array([(joint[4].x - joint[3].x, joint[4].y - joint[3].y) for joint in joints])
         forearm_vecs = np.array([(joint[2].x - joint[1].x, joint[2].y - joint[1].y) for joint in joints])
 
         # normalize portion: SAME FOR ALL EXERCISES
         upper_arm_vecs = upper_arm_vecs / np.expand_dims(np.linalg.norm(upper_arm_vecs, axis=1), axis=1)
+        torso_vecs = torso_vecs / np.expand_dims(np.linalg.norm(torso_vecs, axis=1), axis=1)
         forearm_vecs = forearm_vecs / np.expand_dims(np.linalg.norm(forearm_vecs, axis=1), axis=1)
 
         # get all the angles and median filter them
@@ -175,7 +169,14 @@ def load_features(names, data=None, side=None, bool_val=False, exercise="shoulde
             OpenPose generates noisy keypoints, this would affect the
             performance of DTW. To accommodate for this, we run the
             a keypoint sequence through a size 5 median filter twice before computing the DTW measures
+
+        medium filter applied twice
         """
+
+        upper_arm_torso_angle = np.degrees(
+            np.arccos(np.clip(np.sum(np.multiply(upper_arm_vecs, torso_vecs), axis=1), -1.0, 1.0))
+        )
+        upper_arm_torso_angle_filtered = medfilt(medfilt(upper_arm_torso_angle, 5), 5)  # size 5 median filter twice
 
         upper_arm_forearm_angle = np.degrees(
             np.arccos(np.clip(np.sum(np.multiply(upper_arm_vecs, forearm_vecs), axis=1), -1.0, 1.0))
@@ -184,16 +185,23 @@ def load_features(names, data=None, side=None, bool_val=False, exercise="shoulde
             medfilt(upper_arm_forearm_angle, 5), 5
         )  # size 5 median filter twice
 
-        output1.append(back_vec.tolist())
-        output2.append(upper_arm_forearm_angle_filtered.tolist())
+        if exercise == "shoulderpress":
+            output1.append(back_vec.tolist())
+            output2.append(upper_arm_forearm_angle_filtered.tolist())
+
+        if (exercise == "bicep") or (exercise == "frontraise"):
+            output1.append(upper_arm_torso_angle_filtered.tolist())
+            output2.append(upper_arm_forearm_angle_filtered.tolist())
+
+    # print(len(output1[0]), len(output2[0]), len(output1), len(output2))
     return output1, output2
 
 
-def kmeans_test(names, X_train_1, X_train_2, y_train, data=None, side=None, bool_val=False):
+def kmeans_test(names, X_train_1, X_train_2, y_train, data=None, side=None, bool_val=False, exercise="shoulderpress"):
     if not bool_val:
-        X_test_1, X_test_2 = load_features(names)
+        X_test_1, X_test_2 = load_features(names, exercise=exercise)
     else:
-        X_test_1, X_test_2 = load_features(names, data, side, bool_val=bool_val)
+        X_test_1, X_test_2 = load_features(names, data, side, bool_val=bool_val, exercise=exercise)
     predictions = []
     analysis = []
     for example in range(len(names)):
@@ -210,8 +218,38 @@ def kmeans_test(names, X_train_1, X_train_2, y_train, data=None, side=None, bool
             else:
                 f1_bad.append(dist1)
                 f2_bad.append(dist2)
+
+        f1_good = np.array(f1_good)
+        f2_bad = np.array(f2_bad)
+        f2_good = np.array(f2_good)
+        f1_bad = np.array(f1_bad)
+
+        # sort good indices in first dimension
+        good_idx_sort = np.argsort(f1_good)
+        bad_idx_sort = np.argsort(f1_bad)
+
+        f1_good = f1_good[good_idx_sort]
+        f2_good = f2_good[good_idx_sort]
+        f1_bad = f1_bad[bad_idx_sort]
+        f2_bad = f2_bad[bad_idx_sort]
+
         good_score = np.mean(f1_good) + np.mean(f2_good)
         bad_score = np.mean(f1_bad) + np.mean(f2_bad)
+
+        percentage = (good_score - bad_score) / bad_score * 100 * -1  # percentage
+
+        if percentage > 0:
+            print(f"How good the form is in terms of percentage: {round(percentage, 2)}%")
+        else:
+            print(f"How bad the form is in terms of percentage: {round(percentage, 2)}%")
+
+        # if distance is closer to good form exercises
+        if good_score < bad_score:
+            predictions.append(1)
+            analysis.append("Exercise Performed Correctly")
+        else:  # distance close to bad form exercises
+            predictions.append(0)
+            analysis.append("Exercise needs some work")
 
         # if distance is closer to good form exercises
         if good_score < bad_score:
