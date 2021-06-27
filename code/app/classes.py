@@ -25,12 +25,12 @@ WORKOUT_CHOICES = [('1','Bicep Curl'),('2', 'Front Raise')]
 
 class UploadFileForm(FlaskForm):
     """Class for uploading file when submitted"""
-    file_selector = FileField('File', validators=[FileRequired()])
-    selection = SelectField('Workout_Name', choices=WORKOUT_CHOICES)
+    # file_selector = FileField('File', validators=[FileRequired()])
     file_selector = FileField('File', validators=[
         FileRequired(),
         FileAllowed(['mp4'], 'mp4 video only'),
     ])
+    selection = SelectField('Workout_Name', choices=WORKOUT_CHOICES)
     submit = SubmitField('Submit')
 
 class User(db.Model, UserMixin):
