@@ -38,28 +38,28 @@ def upload():
         workout_type = dict(classes.WORKOUT_CHOICES).get(file.selection.data)
         f = file.file_selector.data  # f : Data of FileField
         filename = secure_filename(f.filename)
-        f.save(os.path.join(
-            'videos', filename
-        ))        
-        items = filename.split('.')
-        subprocess.run([
-            'python3', 'detectron2_repo/demo/demo.py',
-            '--config-file', 'detectron2_repo/configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml',
-            '--video-input', 'videos/' + filename,
-            '--output', 'output/' + items[0] + '.json',
-            '--opts',
-            'MODEL.WEIGHTS', 'detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl',
-            'MODEL.DEVICE', 'cpu',
-        ])
+       #f.save(os.path.join(
+       #    'videos', filename
+       #))        
+       #items = filename.split('.')
+       #subprocess.run([
+       #    'python3', 'detectron2_repo/demo/demo.py',
+       #    '--config-file', 'detectron2_repo/configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml',
+       #    '--video-input', 'videos/' + filename,
+       #    '--output', 'output/' + items[0] + '.json',
+       #    '--opts',
+       #    'MODEL.WEIGHTS', 'detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl',
+       #    'MODEL.DEVICE', 'cpu',
+       #])
 
-        #session = boto3.Session()
-#
-        #session.resource("s3")\
-        #    .Bucket(bucket_name)\
-        #    .put_object(Key=filename, Body=f, ACL='public-read-write')
-#
-        #uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
-        #print(uploaded_file)
+        session = boto3.Session()
+
+        session.resource("s3")\
+            .Bucket(bucket_name)\
+            .put_object(Key=filename, Body=f, ACL='public-read-write')
+
+        uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
+        print(uploaded_file)
 
         return redirect(url_for('userpage'))  # Redirect to / (/index) page.
     return render_template('upload.html', form=file)
@@ -133,13 +133,13 @@ def plot_png():
 @application.route('/userpage', methods=['GET', 'POST'])
 @login_required
 def userpage():
-    #bucket_name = "msds603-swolemate-s3"
-    #s3 = boto3.resource('s3')
-    #my_bucket = s3.Bucket(bucket_name)
+    bucket_name = "msds603-swolemate-s3"
+    s3 = boto3.resource('s3')
+    my_bucket = s3.Bucket(bucket_name)
     unsorted_keys = [[1, '333']]
 
-    #for object_summary in my_bucket.objects.filter():
-    #    unsorted_keys.append([object_summary.key,
-    #                          object_summary.last_modified.strftime("%Y-%m-%d %H:%M:%S")])
-#
+    for object_summary in my_bucket.objects.filter():
+        unsorted_keys.append([object_summary.key,
+                              object_summary.last_modified.strftime("%Y-%m-%d %H:%M:%S")])
+
     return render_template('userpage.html', name=current_user.username, items=unsorted_keys)
