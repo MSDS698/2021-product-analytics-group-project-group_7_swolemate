@@ -8,15 +8,14 @@ File Upload
 
 {% block content %}
 <div class="container">
-    <form method="POST">
-        <h2>Login</h2>
-        {{ form.hidden_tag() }}
+    <form method="POST" enctype="multipart/form-data">
+        <h2>Upload</h2>
+        {{ form.csrf_token }}
         {{ wtf.form_field(form.file_selector) }}
         {{ wtf.form_field(form.selection) }}
-        <center> {{ wtf.form_field(form.submit)}} </center>
+        {{ wtf.form_field(form.submit)}}
     </form>
 </br>
 <center> upload your video </a> </center>
 </div> <!-- /container -->
 {% endblock %}
-
