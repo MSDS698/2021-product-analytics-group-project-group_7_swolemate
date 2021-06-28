@@ -4,17 +4,17 @@
         <a class="navbar-brand" href="/">Swolemate</a>
 
         <ul class="nav-item">
-          <a class="nav-link" href="/#about">About</a>
+          <a class="nav-link" href="/#about" onclick="gtag('event','click',{'event_category':'nav_button','event_label':'nav_about',value:1})">About</a>
         </ul>
 
         <ul class="nav-item">
-          <a class="nav-link" href="/#team">Team</a>
+          <a class="nav-link" href="/#team" onclick="gtag('event','click',{'event_category':'nav_button','event_label':'nav_team',value:1})">Team</a>
         </ul>
 
         {% if not authenticated_user %}
 
         <ul class="nav-item">
-          <a class="nav-link" href="/login">Log in</a>
+          <a class="nav-link" href="/login" onclick="gtag('event','click',{'event_category':'nav_button','event_label':'nav_login',value:1})">Log in</a>
         </ul>
 
         <ul class="nav-item">
@@ -24,11 +24,11 @@
         {% elif authenticated_user %}
 
         <ul class="nav-item">
-          <a class="nav-link" href="/upload">Upload</a>
+          <a class="nav-link" href="/upload" onclick="gtag('event','click',{'event_category':'nav_button','event_label':'nav_upload',value:1})">Upload</a>
         </ul>
 
         <ul class="nav-item">
-          <a class="nav-link" href="/logout">Log out</a>
+          <a class="nav-link" href="/logout" onclick="gtag('event','click',{'event_category':'nav_button','event_label':'nav_logout',value:1})">Log out</a>
         </ul>
 
         {% endif %}

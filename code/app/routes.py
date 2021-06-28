@@ -104,7 +104,7 @@ def upload():
             return send_file('/app/output/' + items[0] + '.json')"""
         
         return redirect(url_for('userpage'))  # Redirect to / (/index) page.
-    return render_template('upload.html', form=file)
+    return render_template('upload.html', form=file,authenticated_user=current_user.is_authenticated)
 
 
 @application.route('/register',  methods=('GET', 'POST'))
@@ -145,7 +145,7 @@ def login():
         # Login and validate the user.
         if user is not None and user.check_password(password):
             login_user(user)
-            return redirect(url_for('userpage'))
+            return redirect(url_for('upload'))
             # return("<h1> Welcome {}!</h1>".format(username))
 
     return render_template('login.html', form=login_form)
@@ -154,14 +154,14 @@ def login():
 @application.route('/logout')
 @login_required
 def logout():
-    before_logout = '<h1> Before logout - is_autheticated : ' \
-                    + str(current_user.is_authenticated) + '</h1>'
+    # before_logout = '<h1> Before logout - is_autheticated : ' \
+    #                 + str(current_user.is_authenticated) + '</h1>'
 
     logout_user()
 
-    after_logout = '<h1> After logout - is_autheticated : ' \
-                   + str(current_user.is_authenticated) + '</h1>'
-    return before_logout + after_logout
+    # after_logout = '<h1> After logout - is_autheticated : ' \
+    #                + str(current_user.is_authenticated) + '</h1>'
+    return redirect(url_for('index'))
 
 
 @application.route('/plot.png')
@@ -186,4 +186,5 @@ def userpage():
     uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/input.mp4'
     return render_template('userpage.html', name=current_user.username, value=value, video_name=uploaded_file, 
                           range_ang_1=range_ang_1, range_ang_2=range_ang_2, range_user_ang_1=range_user_ang_1, 
-                           range_user_ang_2=range_user_ang_2, label=label, first_time=first_time)
+                           range_user_ang_2=range_user_ang_2, label=label, first_time=first_time, 
+                           authenticated_user=current_user.is_authenticated)
