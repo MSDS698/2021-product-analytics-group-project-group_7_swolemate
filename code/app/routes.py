@@ -1,5 +1,5 @@
 from app import application, classes, db
-from flask import render_template, redirect, url_for, Response
+from flask import render_template, redirect, url_for, Response, request, send_file,
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from utils import *
@@ -14,6 +14,14 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from flask_login import current_user, login_user, login_required, logout_user
 
 #docker run --rm -it -p 5000:5000 zwy8203302/app:v0 bash
+first_time = 1
+value = 0
+uploaded_file = None
+range_ang_1 = 0
+range_ang_2 = 0
+range_user_ang_1 = 0
+range_user_ang_2 = 0
+label = None
 
 @application.route('/index')
 @application.route('/')
@@ -71,20 +79,31 @@ def upload():
         y_train = get_labels(X_train_names)
 
         X_train_1, X_train_2 = load_features(X_train_names)
-
-        value, _, _ = kmeans_test(['demo'], X_train_1=X_train_1, X_train_2=X_train_2, y_train=y_train, data=data, side=side, bool_val=True, exercise=workout_type)
         
-        
-        """session = boto3.Session()
+        global value
+        global uploaded_file
+        global range_ang_1
+        global range_ang_2
+        global range_user_ang_1
+        global range_user_ang_2
+        global label
+        global first_time
 
+        value, _, _, range_ang_1, range_ang_2, range_user_ang_1, range_user_ang_2, label = kmeans_test(['demo'], X_train_names, X_train_1=X_train_1, X_train_2=X_train_2, y_train=y_train, data=data, side=side, bool_val=True, exercise=workout_type)
+        first_time = 0
+        
+        # Adding to s3
+        session = boto3.Session()
         session.resource("s3")\
             .Bucket(bucket_name)\
-            .put_object(Key=filename, Body=f, ACL='public-read-write')
-
+            .put_object(Key=filename, Body=os.path.join('videos', filename), ACL='public-read-write')
+        
         uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
-        """
-        #return redirect(url_for('userpage', value=value))  # Redirect to / (/index) page.
-        return userpage(value)
+        
+        if request.args.get('debug') != "":
+            return send_file('/app/output/' + items[0] + '.json')
+        
+        return redirect(url_for('userpage'))  # Redirect to / (/index) page.
     return render_template('upload.html', form=file)
 
 
@@ -165,4 +184,7 @@ def userpage():
     #    unsorted_keys.append([object_summary.key,
     #                          object_summary.last_modified.strftime("%Y-%m-%d %H:%M:%S")])
 #
-    return render_template('userpage.html', name=current_user.username, items=unsorted_keys)
+    uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/input.mp4'
+    return render_template('userpage.html', name=current_user.username, items=unsorted_keys, value=value, video_name=uploaded_file, 
+                          range_ang_1=range_ang_1, range_ang_2=range_ang_2, range_user_ang_1=range_user_ang_1, 
+                           range_user_ang_2=range_user_ang_2, label=label, first_time=first_time)

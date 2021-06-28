@@ -172,13 +172,22 @@ def load_features(names, exercise='Bicep Curl', data=None, side=None, bool_val=F
             output2.append(upper_arm_forearm_angle_filtered.tolist())
     return output1, output2
 
-def kmeans_test(names, X_train_1, X_train_2, y_train, data=None, side=None, bool_val=False, exercise="Bicep Curl"):
+def kmeans_test(names, X_train_names, X_train_1, X_train_2, y_train, data=None, side=None, bool_val=False, exercise="Bicep Curl"):
     if not bool_val:
         X_test_1, X_test_2 = load_features(names, exercise=exercise)
     else:
         X_test_1, X_test_2 = load_features(names, exercise=exercise, data=data, side=side, bool_val=bool_val)
     predictions = []
     analysis = []
+    if exercise == 'Bicep Curl': 
+        label = 'Angles between Upper Arm and Torso'
+    elif exercise == 'Shoulder Press': 
+        label = 'Movement of Back'
+    idx = np.nonzero(np.array(['good' in elem for elem in X_train_names], dtype=int))[0]
+    X_train_names_arr = np.array(X_train_names)
+    X_train_1_arr = np.array(X_train_1, dtype=object)
+    X_train_2_arr = np.array(X_train_2, dtype=object)
+    range_ang_1, range_ang_2 = plot_angles(X_train_names_arr[idx][0], X_train_1_arr[idx][0], X_train_2_arr[idx][0], label, exercise)
     for example in range(len(names)):
         # Store the average distance to good and bad training examples
         f1_good, f1_bad, f2_good, f2_bad = [[] for i in range(4)]
@@ -215,16 +224,17 @@ def kmeans_test(names, X_train_1, X_train_2, y_train, data=None, side=None, bool
         plt.ylabel("Distance using Upper Arm Forearm Angle (in Degrees)")
         plt.title(f"Distance between {names[example]} and Good/Bad Examples")
         plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0.)
-        plt.savefig('image.jpg', bbox_inches="tight")
+        plt.savefig('app/static/assets/image.jpg', bbox_inches="tight")
+        plt.close()
 
         good_score = np.mean(f1_good) + np.mean(f2_good)
         bad_score = np.mean(f1_bad) + np.mean(f2_bad)
 
         percentage = (good_score - bad_score) / bad_score * 100 * -1  # percentage
         percentage = round(percentage, 2)
-
         
-
+        range_user_ang_1, range_user_ang_2 = plot_angles(['Demo'], X_test_1[0], X_test_2[0], exercise, label, str_val='Inputted_Form')
+        
         # if distance is closer to good form exercises
         if good_score < bad_score:
             predictions.append(1)
@@ -232,7 +242,35 @@ def kmeans_test(names, X_train_1, X_train_2, y_train, data=None, side=None, bool
         else:  # distance close to bad form exercises
             predictions.append(0)
             analysis.append("Exercise needs some work")
-    return percentage, analysis, predictions
+    return percentage, analysis, predictions, range_ang_1, range_ang_2, range_user_ang_1, range_user_ang_2, label
+
+def plot_angles(name, angle_1, angle_2, exercise, label, str_val='Good_Form'):  
+    # Generate plots
+    # plt.scatter(np.arange(upper_arm_torso_angle.shape[0]),upper_arm_torso_angle, alpha=0.5)
+    angle_1 = np.array(angle_1)
+    print("Range of " + label + ": {}".format(np.max(angle_1)-np.min(angle_1)))
+    range_ang_1 = np.max(angle_1)-np.min(angle_1)
+    plt.scatter(np.arange(angle_1.shape[0]),angle_1, c='r', alpha=0.5)
+    plt.title(f"{label} for {name}")
+    plt.xlabel('Frames')
+    plt.ylabel(label)
+    # Set range on y-axis so the plots are consistent
+    plt.ylim(0,90) 
+    plt.savefig('app/static/assets/' + str_val + '1.jpg', bbox_inches="tight")
+    plt.close()
+
+    upper_forearm_angle_filtered = np.array(angle_2)
+    print("Minimum Angle between Upper Arm and Forearm: {}".format(np.min(upper_forearm_angle_filtered)))
+    range_ang_2 = np.min(upper_forearm_angle_filtered)
+    plt.scatter(np.arange(upper_forearm_angle_filtered.shape[0]),upper_forearm_angle_filtered, c='b', alpha=0.5)
+    plt.title(f"Angle between Upper Arm and Forearm for {name}")
+    plt.xlabel('Frames')
+    plt.ylabel('Angle between Upper Arm and Forearm')
+    # Set range on y-axis so the plots are consistent
+    plt.ylim(0,180) 
+    plt.savefig('app/static/assets/' + str_val + '2.jpg', bbox_inches="tight")
+    plt.close()
+    return round(range_ang_1, 2), round(range_ang_2, 2)
 
 if __name__ == "__main__":
     json_file_name = sys.argv[1]
