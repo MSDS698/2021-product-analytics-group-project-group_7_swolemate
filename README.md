@@ -19,12 +19,10 @@
 
 ## Model
 
-We used Detectron2, which is developed by Facebook AI Research, to detect the movements of human joint points in vedios.
-And We used the outputs of pose estimation to evaluate videos of professional trainers and users through human pose keypoints.
-In this project, we evaluated three exercises: bicep curl, front raise, and shoulder press.
+We used Detectron2, which is developed by Facebook AI Research, to detect the movements of human joint points in vedios. And We used the outputs of pose estimation to evaluate videos of professional trainers and users through human pose keypoints. In this project, we evaluated three exercises: bicep curl, front raise, and shoulder press.
 
-References:
-https://github.com/facebookresearch/detectron2
+References: <br>
+https://github.com/facebookresearch/detectron2 <br>
 https://github.com/stevenzchen/pose-trainer
 
 ## Trello Project Management <img src = './readme/trello2.jpeg' height = 20>
