@@ -7,9 +7,10 @@
 *Providing Hollywood level training in the comfort of your home*
 
 **CEO**: [Kexin Wang](https://www.linkedin.com/in/sheena-kexin-wang-3a51b7170/) <br>
-**CTO**: [Daniel Carrera](https://www.linkedin.com/in/daniel-carrera/)
-**Data Scientist**:  Elyse Cheung-Sutton(https://www.linkedin.com/in/elysecs), Moh Kaddoura(https://www.linkedin.com/in/moh-kaddoura/)
-**Back End**: Suren Gunturu, Kristofor Johnson, Wenyao Zhang, Boliang Liu
+**CTO**: [Daniel Carrera](https://www.linkedin.com/in/daniel-carrera/) <br>
+**Data Scientist**:  Elyse Cheung-Sutton(https://www.linkedin.com/in/elysecs), Moh Kaddoura(https://www.linkedin.com/in/moh-kaddoura/) <br>
+**Engineer**: [Boliang Liu](https://www.linkedin.com/in/boliang-liu/), [Kristofor Johnson](https://www.linkedin.com/in/kr-johnson/),
+              [Suren Gunturu](https://www.linkedin.com/in/suren-gunturu/), [Wenyao Zhang](https://www.linkedin.com/in/wenyao-zhang/) <br>
 
 <img src = './readme/new_image_girl.png' height = 250>   <img src = './readme/new_image_boy.png' height = 250>
 
