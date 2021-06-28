@@ -7,7 +7,8 @@
 *Providing Hollywood level training in the comfort of your home*
 
 **CEO**: [Kexin Wang](https://www.linkedin.com/in/sheena-kexin-wang-3a51b7170/)
-**Front End**:  Elyse Cheung-Sutton, Daniel Carrera, Moh Kaddoura <br>
+**CTO**: [Daniel Carrera](https://www.linkedin.com/in/daniel-carrera/)
+**Data Scientist**:  Elyse Cheung-Sutton(https://www.linkedin.com/in/elysecs), Moh Kaddoura(https://www.linkedin.com/in/moh-kaddoura/)
 **Back End**: Suren Gunturu, Kristofor Johnson, Wenyao Zhang, Boliang Liu
 
 <img src = './readme/new_image_girl.png' height = 250>   <img src = './readme/new_image_boy.png' height = 250>
