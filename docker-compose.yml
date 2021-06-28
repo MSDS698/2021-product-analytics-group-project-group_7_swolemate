@@ -1,13 +1,16 @@
 version: "3"
 services:
   web:
-    image: test0
+    image: suren12/app_image
     ports:
       - "80:5000"
     container_name: web
     networks:
       - default
       - swole_net
+    environment:
+      - AWS_ACCESS_KEY_ID=AKIAUXVB3DNXBLVCWM22
+      - AWS_SECRET_ACCESS_KEY=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
 
 networks:
    swole_net:
