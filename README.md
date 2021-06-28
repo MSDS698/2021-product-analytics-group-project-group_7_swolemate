@@ -23,7 +23,7 @@ We used Detectron2, which is developed by Facebook AI Research, to detect the mo
 And We used the outputs of pose estimation to evaluate videos of professional trainers and users through human pose keypoints. <br>
 In this project, we evaluated three exercises: bicep curl, front raise, and shoulder press.
 
-References:
+References: <br>
 https://github.com/facebookresearch/detectron2 <br>
 https://github.com/stevenzchen/pose-trainer
 
