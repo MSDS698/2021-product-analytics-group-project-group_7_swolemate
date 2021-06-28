@@ -6,7 +6,7 @@
 
 *Providing Hollywood level training in the comfort of your home*
 
-**CEO**: Kexin Wang <br>
+**CEO**: [Kexin Wang] (https://www.linkedin.com/in/sheena-kexin-wang-3a51b7170/)
 **Front End**:  Elyse Cheung-Sutton, Daniel Carrera, Moh Kaddoura <br>
 **Back End**: Suren Gunturu, Kristofor Johnson, Wenyao Zhang, Boliang Liu
 
