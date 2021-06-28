@@ -10849,17 +10849,19 @@ textarea.form-control-lg {
 
 header.masthead {
   position: relative;
-  background: url("../assets/workout.jpeg") no-repeat center center;
-  width: 100%;
-  top: 0;
-  left: 0;
+  background: url("../assets/banner.jpeg") no-repeat center center;
+  background-size: cover;
+  padding-top: 8rem;
+  padding-bottom: 8rem;
 }
 header.masthead:before {
   content: "";
   position: absolute;
+  height: 100%;
   width: 100%;
   top: 0;
   left: 0;
+  opacity: 0.5;
 }
 header.masthead h1, header.masthead .h1 {
   font-size: 2rem;

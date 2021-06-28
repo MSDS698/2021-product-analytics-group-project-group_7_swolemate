@@ -45,6 +45,11 @@ def get_labels(array):
 
 
 def load_tester(path):
+    """
+    Load the json file
+    Arguments: 
+        path(str): path to the json file
+    """
     with open(path) as f:
         data = json.load(f)
     return np.asarray(data)
@@ -173,6 +178,29 @@ def load_features(names, exercise='Bicep Curl', data=None, side=None, bool_val=F
     return output1, output2
 
 def kmeans_test(names, X_train_names, X_train_1, X_train_2, y_train, data=None, side=None, bool_val=False, exercise="Bicep Curl"):
+    """
+    Evaluating the given inputted exercise based on training data
+    Arguments: 
+        names(str): name of the file
+        X_train_names(list): list of training file names
+        X_train_1(list): list of values representing the first feature of the video exercise
+        X_train_2(list): list of values representing the second feature of the video exercise
+        y_train(list): Labels of the training samples as either good or bad form
+        data(list): if loaded from external json file, data of json file is supplied here
+        side(str): if loaded from external json file, must specify side as either left or right facing in the point of view 
+            of the camera
+        bool_val(boolean): whether loading from external json file (True), or taking from poses_compressed folder (False)
+        exercise(str): what exercise is specified from dropdown in web page
+    Returns: 
+        percentage(float): 
+        analysis(list): 
+        predictions(list):  
+        range_ang_1(float):  
+        range_ang_2(float): 
+        range_user_ang_1(float): 
+        range_user_ang_2(float): 
+        label(boolean): 
+    """
     if not bool_val:
         X_test_1, X_test_2 = load_features(names, exercise=exercise)
     else:
