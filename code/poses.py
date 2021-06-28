@@ -24,12 +24,15 @@ class Part:
 
     @staticmethod
     def dist(part1, part2):
-        return np.sqrt(np.square(part1.x - part2.x) + np.square(part1.y - part2.y))
+        return np.sqrt(np.square(part1.x - part2.x) +
+                       np.square(part1.y - part2.y))
 
 
 class Pose:
 
-    # ********** Fix this part names array based on order of pose estimation coordinates ***********
+    # **********
+    # Fix this part names array based on order of pose estimation coordinates
+    # ***********
     PART_NAMES = [
         "nose",
         "neck",
@@ -71,16 +74,18 @@ class Pose:
     def __str__(self):
         out = ""
         for name in self.PART_NAMES:
-            _ = "{}: {},{}".format(name, getattr(self, name).x, getattr(self, name).y)
+            _ = "{}: {},{}".format(name, getattr(self, name).x,
+                                   getattr(self, name).y)
             out = out + _ + "\n"
         return out
 
     def print(self, parts):
         out = ""
         for name in parts:
-            if not name in self.PART_NAMES:
+            if name not in self.PART_NAMES:
                 raise NameError(name)
-            _ = "{}: {},{}".format(name, getattr(self, name).x, getattr(self, name).y)
+            _ = "{}: {},{}".format(name, getattr(self, name).x,
+                                   getattr(self, name).y)
             out = out + _ + "\n"
         return out
 
@@ -91,25 +96,29 @@ class PoseSequence:
     """
 
     def __init__(self, sequence):
-        self.poses = []  # sequence of poses where a pose is a coordinate for each part
+        self.poses = []  # seq of poses where pose is coordinate for each part
         for parts in sequence:
             self.poses.append(Pose(parts))
 
-        # normalize poses based on the average torso pixel length, from the article as described below:
+        # normalize poses based on the average torso pixel length,
+        # from the article as described below:
         """
-        to generalize our application to account for users with different body length measurements, distance 
-            from the camera, as well as other relative factors
+        to generalize our application to account for users with different
+            body length measurements, distance from the camera,
+            as well as other relative factors
         we normalize the pose based on
             the torso’s length in pixels. The torso length is calculated
             by the average of the distance from the neck keypoint to the
-            right and left hip keypoints. This normalization works extremely well: we observe that the torso length stays very
+            right and left hip keypoints. This normalization works extremely
+            well: we observe that the torso length stays very
             constant through all the frames of input videos. Distances
             are thus represented as ratios of torso length: for instance,
             an upper arm length of 0.6 means that the upper arm is 0.6
             the length of the torso.
         """
         torso_lengths = np.array(
-            [Part.dist(pose.neck, pose.left_hip) for pose in self.poses if pose.neck.exists and pose.left_hip.exists]
+            [Part.dist(pose.neck, pose.left_hip) for pose in self.poses
+                if pose.neck.exists and pose.left_hip.exists]
             + [
                 Part.dist(pose.neck, pose.right_hip)
                 for pose in self.poses
@@ -120,4 +129,5 @@ class PoseSequence:
 
         for pose in self.poses:
             for attr, part in pose:
-                setattr(pose, attr, part / mean_torso)  # the certain attribute of the pose should all be normalized
+                # the certain attribute of the pose should all be normalized
+                setattr(pose, attr, part / mean_torso)
