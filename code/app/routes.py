@@ -135,14 +135,14 @@ def login():
 @application.route('/logout')
 @login_required
 def logout():
-    before_logout = '<h1> Before logout - is_autheticated : ' \
-                    + str(current_user.is_authenticated) + '</h1>'
+    # before_logout = '<h1> Before logout - is_autheticated : ' \
+    #                 + str(current_user.is_authenticated) + '</h1>'
 
     logout_user()
 
-    after_logout = '<h1> After logout - is_autheticated : ' \
-                   + str(current_user.is_authenticated) + '</h1>'
-    return before_logout + after_logout
+    # after_logout = '<h1> After logout - is_autheticated : ' \
+    #                + str(current_user.is_authenticated) + '</h1>'
+    return redirect(url_for('index'))
 
 
 @application.route('/plot.png')
