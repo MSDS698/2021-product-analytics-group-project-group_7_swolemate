@@ -43,7 +43,15 @@ def upload():
         
         f.save(os.path.join(
             'videos', filename
-        ))        
+        ))
+
+        session = boto3.Session()
+        session.resource("s3")\
+            .Bucket(bucket_name)\
+            .upload_file(os.path.join('videos', filename), filename)
+        uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
+        print(uploaded_file)
+
         items = filename.split('.')
         subprocess.run([
             'python3', 'detectron2_repo/demo/demo.py',
@@ -55,13 +63,6 @@ def upload():
             'MODEL.DEVICE', 'cpu',
         ])
         
-        session = boto3.Session()
-        session.resource("s3")\
-            .Bucket(bucket_name)\
-            .put_object(Key=filename, Body=os.path.join('videos', filename), ACL='public-read-write')
-        uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
-        print(uploaded_file)
-
         if request.args.get('debug') != "":
             return send_file('/app/output/' + items[0] + '.json')
 
