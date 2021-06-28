@@ -276,7 +276,6 @@ def plot_angles(name, angle_1, angle_2, exercise, label, str_val='Good_Form'):
     # Generate plots
     # plt.scatter(np.arange(upper_arm_torso_angle.shape[0]),upper_arm_torso_angle, alpha=0.5)
     angle_1 = np.array(angle_1)
-    print("Range of " + label + ": {}".format(np.max(angle_1)-np.min(angle_1)))
     range_ang_1 = np.max(angle_1)-np.min(angle_1)
     plt.scatter(np.arange(angle_1.shape[0]),angle_1, c='r', alpha=0.5)
     plt.title(f"{label} for {name}")
@@ -288,7 +287,6 @@ def plot_angles(name, angle_1, angle_2, exercise, label, str_val='Good_Form'):
     plt.close()
 
     upper_forearm_angle_filtered = np.array(angle_2)
-    print("Minimum Angle between Upper Arm and Forearm: {}".format(np.min(upper_forearm_angle_filtered)))
     range_ang_2 = np.min(upper_forearm_angle_filtered)
     plt.scatter(np.arange(upper_forearm_angle_filtered.shape[0]),upper_forearm_angle_filtered, c='b', alpha=0.5)
     plt.title(f"Angle between Upper Arm and Forearm for {name}")

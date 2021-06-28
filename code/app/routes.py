@@ -96,7 +96,8 @@ def upload():
             .upload_file(os.path.join('videos', filename), filename)
         uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
         
-        return userpage()
+        print()
+        return redirect(url_for('userpage'))
     return render_template('upload.html', form=file,authenticated_user=current_user.is_authenticated)
 
 

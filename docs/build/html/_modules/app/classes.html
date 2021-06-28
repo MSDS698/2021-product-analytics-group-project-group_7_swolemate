@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>app.classes &#8212; Swolemate  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for app.classes</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">flask_wtf</span> <span class="kn">import</span> <span class="n">FlaskForm</span>
+<span class="kn">from</span> <span class="nn">flask_login</span> <span class="kn">import</span> <span class="n">UserMixin</span>
+<span class="kn">from</span> <span class="nn">werkzeug.security</span> <span class="kn">import</span> <span class="n">check_password_hash</span>
+<span class="kn">from</span> <span class="nn">werkzeug.security</span> <span class="kn">import</span> <span class="n">generate_password_hash</span>
+
+<span class="kn">from</span> <span class="nn">wtforms</span> <span class="kn">import</span> <span class="n">PasswordField</span><span class="p">,</span> <span class="n">StringField</span><span class="p">,</span> <span class="n">SubmitField</span><span class="p">,</span> <span class="n">RadioField</span>
+<span class="kn">from</span> <span class="nn">wtforms</span> <span class="kn">import</span> <span class="n">IntegerField</span><span class="p">,</span> <span class="n">SelectField</span><span class="p">,</span> <span class="n">FloatField</span><span class="p">,</span> <span class="n">DateTimeField</span><span class="p">,</span> <span class="n">BooleanField</span>
+<span class="kn">from</span> <span class="nn">wtforms.validators</span> <span class="kn">import</span> <span class="n">DataRequired</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">flask_wtf.file</span> <span class="kn">import</span> <span class="n">FileField</span><span class="p">,</span> <span class="n">FileRequired</span><span class="p">,</span> <span class="n">FileAllowed</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_agg</span> <span class="kn">import</span> <span class="n">FigureCanvasAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
+<span class="kn">from</span> <span class="nn">matplotlib.figure</span> <span class="kn">import</span> <span class="n">Figure</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">db</span><span class="p">,</span> <span class="n">login_manager</span>
+
+<span class="n">authors</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Kexin Wang&#39;</span><span class="p">,</span><span class="s1">&#39;position&#39;</span><span class="p">:</span><span class="s1">&#39;CEO&#39;</span><span class="p">,</span><span class="s1">&#39;linkedin&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.linkedin.com/in/sheena-kexin-wang-3a51b7170/&#39;</span><span class="p">,</span> <span class="s1">&#39;pic&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/pic1_-_kexin_wang.jpg?itok=Sx5fOi-S&#39;</span><span class="p">},</span>
+<span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Daniel Carrera&#39;</span><span class="p">,</span> <span class="s1">&#39;position&#39;</span><span class="p">:</span><span class="s1">&#39;CTO&#39;</span><span class="p">,</span><span class="s1">&#39;linkedin&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.linkedin.com/in/daniel-carrera/&#39;</span><span class="p">,</span><span class="s1">&#39;pic&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/catalog/arts_and_sciences/img_3126_-_daniel_carrera.jpg?itok=V2Fpl961&#39;</span><span class="p">},</span> 
+<span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Boliang Liu&#39;</span><span class="p">,</span><span class="s1">&#39;position&#39;</span><span class="p">:</span><span class="s1">&#39;Data Scientist&#39;</span><span class="p">,</span><span class="s1">&#39;linkedin&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.linkedin.com/in/boliang-liu/&#39;</span><span class="p">,</span><span class="s1">&#39;pic&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/images/headshots/boliang_liu.jpg?itok=goQGlgND&#39;</span><span class="p">},</span>
+<span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Elyse Cheung-Sutton&#39;</span><span class="p">,</span><span class="s1">&#39;position&#39;</span><span class="p">:</span><span class="s1">&#39;Data Scientist&#39;</span><span class="p">,</span> <span class="s1">&#39;linkedin&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.linkedin.com/in/elysecs/&#39;</span><span class="p">,</span><span class="s1">&#39;pic&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.usfca.edu/sites/default/files/images/headshots/elyse_cheung-sutton.jpg&#39;</span><span class="p">},</span>
+<span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Kris Johnson&#39;</span><span class="p">,</span><span class="s1">&#39;position&#39;</span><span class="p">:</span><span class="s1">&#39;Data Scientist&#39;</span><span class="p">,</span><span class="s1">&#39;linkedin&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.linkedin.com/in/kr-johnson/&#39;</span><span class="p">,</span><span class="s1">&#39;pic&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/images/headshots/kristofor_johnson.jpg?itok=UOXI4F-1&#39;</span><span class="p">},</span>
+<span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Moh Kaddoura&#39;</span><span class="p">,</span> <span class="s1">&#39;position&#39;</span><span class="p">:</span><span class="s1">&#39;Data Scientist&#39;</span><span class="p">,</span><span class="s1">&#39;linkedin&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.linkedin.com/in/moh-kaddoura/&#39;</span><span class="p">,</span><span class="s1">&#39;pic&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/images/headshots/moh_kaddoura.jpg?itok=AtQnH6ya&#39;</span><span class="p">},</span>
+<span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Suren Gunturu&#39;</span><span class="p">,</span> <span class="s1">&#39;position&#39;</span><span class="p">:</span><span class="s1">&#39;Data Scientist&#39;</span><span class="p">,</span><span class="s1">&#39;linkedin&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.linkedin.com/in/suren-gunturu/&#39;</span><span class="p">,</span><span class="s1">&#39;pic&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.usfca.edu/sites/default/files/images/headshots/suren_gunturu.jpg&#39;</span><span class="p">},</span> 
+<span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;Wenyao Zhang&#39;</span><span class="p">,</span> <span class="s1">&#39;position&#39;</span><span class="p">:</span><span class="s1">&#39;Data Scientist&#39;</span><span class="p">,</span> <span class="s1">&#39;linkedin&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.linkedin.com/in/wenyao-zhang/&#39;</span><span class="p">,</span><span class="s1">&#39;pic&#39;</span><span class="p">:</span><span class="s1">&#39;https://www.usfca.edu/sites/default/files/styles/rte_150x150/public/images/headshots/wenyao-zhang.jpg?itok=Y09MBXza&#39;</span><span class="p">}]</span>
+
+<span class="n">WORKOUT_CHOICES</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;1&#39;</span><span class="p">,</span><span class="s1">&#39;Bicep Curl&#39;</span><span class="p">),(</span><span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;Front Raise&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;3&#39;</span><span class="p">,</span> <span class="s1">&#39;Shoulder Press&#39;</span><span class="p">)]</span> <span class="c1"># choose the exercise</span>
+<span class="n">SIDE_CHOICES</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;Left&#39;</span><span class="p">),(</span><span class="s1">&#39;2&#39;</span><span class="p">,</span> <span class="s1">&#39;Right&#39;</span><span class="p">)]</span> <span class="c1"># choose what side you are facing relative to the camera</span>
+
+<div class="viewcode-block" id="UploadFileForm"><a class="viewcode-back" href="../../code.html#app.classes.UploadFileForm">[docs]</a><span class="k">class</span> <span class="nc">UploadFileForm</span><span class="p">(</span><span class="n">FlaskForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for uploading file when submitted</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># file_selector = FileField(&#39;File&#39;, validators=[FileRequired()])</span>
+    <span class="n">file_selector</span> <span class="o">=</span> <span class="n">FileField</span><span class="p">(</span><span class="s1">&#39;File&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">FileRequired</span><span class="p">(),</span>
+        <span class="n">FileAllowed</span><span class="p">([</span><span class="s1">&#39;mp4&#39;</span><span class="p">],</span> <span class="s1">&#39;mp4 video only&#39;</span><span class="p">),</span>
+    <span class="p">])</span>
+    <span class="n">exercise_selection</span> <span class="o">=</span> <span class="n">SelectField</span><span class="p">(</span><span class="s1">&#39;Workout Name&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">WORKOUT_CHOICES</span><span class="p">)</span>
+    <span class="n">side_selection</span> <span class="o">=</span> <span class="n">SelectField</span><span class="p">(</span><span class="s1">&#39;Side Faced Relative to the Camera&#39;</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="n">SIDE_CHOICES</span><span class="p">)</span>
+    <span class="n">submit</span> <span class="o">=</span> <span class="n">SubmitField</span><span class="p">(</span><span class="s1">&#39;Submit&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="User"><a class="viewcode-back" href="../../code.html#app.classes.User">[docs]</a><span class="k">class</span> <span class="nc">User</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">,</span> <span class="n">UserMixin</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create User class and connect to Postgres so Users can be stored</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">80</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">80</span><span class="p">),</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">password_hash</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">Column</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">String</span><span class="p">(</span><span class="mi">120</span><span class="p">),</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters: </span>
+<span class="sd">            username(str): user inputted username when logging or registering</span>
+<span class="sd">            email(str): user inputted email when logging or registering</span>
+<span class="sd">            password(str): user inputted password when logging or registering</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">email</span> <span class="o">=</span> <span class="n">email</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_password</span><span class="p">(</span><span class="n">password</span><span class="p">)</span>
+
+<div class="viewcode-block" id="User.set_password"><a class="viewcode-back" href="../../code.html#app.classes.User.set_password">[docs]</a>    <span class="k">def</span> <span class="nf">set_password</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create password hash</span>
+<span class="sd">        Arguments: </span>
+<span class="sd">            password(str): user inputted password when logging or registering</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password_hash</span> <span class="o">=</span> <span class="n">generate_password_hash</span><span class="p">(</span><span class="n">password</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="User.check_password"><a class="viewcode-back" href="../../code.html#app.classes.User.check_password">[docs]</a>    <span class="k">def</span> <span class="nf">check_password</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if password is valid</span>
+<span class="sd">        Arguments: </span>
+<span class="sd">            password(str): user inputted password when logging or registering</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">check_password_hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">password_hash</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="RegistrationForm"><a class="viewcode-back" href="../../code.html#app.classes.RegistrationForm">[docs]</a><span class="k">class</span> <span class="nc">RegistrationForm</span><span class="p">(</span><span class="n">FlaskForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Content of Registration form, with information to add: </span>
+<span class="sd">    - username</span>
+<span class="sd">    - email</span>
+<span class="sd">    - password</span>
+<span class="sd">    And a submit button</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;Username:&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">()])</span>
+    <span class="n">email</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;Email:&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">()])</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="n">PasswordField</span><span class="p">(</span><span class="s1">&#39;Password:&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">()])</span>
+    <span class="n">submit</span> <span class="o">=</span> <span class="n">SubmitField</span><span class="p">(</span><span class="s1">&#39;Submit&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LogInForm"><a class="viewcode-back" href="../../code.html#app.classes.LogInForm">[docs]</a><span class="k">class</span> <span class="nc">LogInForm</span><span class="p">(</span><span class="n">FlaskForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Content of Log In form with Users able to add: </span>
+<span class="sd">    - username</span>
+<span class="sd">    - password</span>
+<span class="sd">    And a submit button</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="s1">&#39;Username:&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">()])</span>
+    <span class="n">password</span> <span class="o">=</span> <span class="n">PasswordField</span><span class="p">(</span><span class="s1">&#39;Password:&#39;</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="p">[</span><span class="n">DataRequired</span><span class="p">()])</span>
+    <span class="n">submit</span> <span class="o">=</span> <span class="n">SubmitField</span><span class="p">(</span><span class="s1">&#39;Login&#39;</span><span class="p">)</span></div>
+
+<span class="n">db</span><span class="o">.</span><span class="n">create_all</span><span class="p">()</span>
+<span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+<span class="c1"># user_loader :</span>
+<span class="c1"># This callback is used to reload the user object</span>
+<span class="c1"># from the user ID stored in the session.</span>
+<div class="viewcode-block" id="load_user"><a class="viewcode-back" href="../../code.html#app.classes.load_user">[docs]</a><span class="nd">@login_manager</span><span class="o">.</span><span class="n">user_loader</span>
+<span class="k">def</span> <span class="nf">load_user</span><span class="p">(</span><span class="nb">id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the particular user id</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">User</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="create_figure"><a class="viewcode-back" href="../../code.html#app.classes.create_figure">[docs]</a><span class="k">def</span> <span class="nf">create_figure</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Testing function, creating a figure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/shiqi_xycoords.json&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">Figure</span><span class="p">()</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">lwrist</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">data</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">record</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span><span class="o">==</span><span class="s1">&#39;left_wrist&#39;</span><span class="p">]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lwrist</span><span class="p">]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">lwrist</span><span class="p">]</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+    <span class="n">axis</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Left Wrist Position&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">fig</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Swolemate</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code.html">Auto Generated Code Documentation</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Bolian Liu, Daniel Carrera, Elyse Cheung-Sutton, Kris Johnson, Kexin Wang, Moh Kaddoura, Suren Gunturu, Wenyao Zhang.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

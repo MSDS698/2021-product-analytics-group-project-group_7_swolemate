@@ -1,0 +1,283 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>app.routes &#8212; Swolemate  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for app.routes</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">application</span><span class="p">,</span> <span class="n">classes</span><span class="p">,</span> <span class="n">db</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">url_for</span><span class="p">,</span> <span class="n">Response</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">send_file</span>
+<span class="kn">from</span> <span class="nn">flask_wtf</span> <span class="kn">import</span> <span class="n">FlaskForm</span>
+<span class="kn">from</span> <span class="nn">flask_wtf.file</span> <span class="kn">import</span> <span class="n">FileField</span><span class="p">,</span> <span class="n">FileRequired</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">wtforms</span> <span class="kn">import</span> <span class="n">SubmitField</span>
+<span class="kn">from</span> <span class="nn">werkzeug.utils</span> <span class="kn">import</span> <span class="n">secure_filename</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">boto3</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">from</span> <span class="nn">matplotlib.backends.backend_agg</span> <span class="kn">import</span> <span class="n">FigureCanvasAgg</span> <span class="k">as</span> <span class="n">FigureCanvas</span>
+
+<span class="kn">from</span> <span class="nn">flask_login</span> <span class="kn">import</span> <span class="n">current_user</span><span class="p">,</span> <span class="n">login_user</span><span class="p">,</span> <span class="n">login_required</span><span class="p">,</span> <span class="n">logout_user</span>
+
+<span class="c1">#docker run --rm -it -p 5000:5000 zwy8203302/app:v0 bash</span>
+<span class="n">first_time</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">value</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">uploaded_file</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">range_ang_1</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">range_ang_2</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">range_user_ang_1</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">range_user_ang_2</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">label</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="index"><a class="viewcode-back" href="../../code.html#app.routes.index">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/index&#39;</span><span class="p">)</span>
+<span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Index Page : Renders index.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;index.html&#39;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="upload"><a class="viewcode-back" href="../../code.html#app.routes.upload">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/upload&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="k">def</span> <span class="nf">upload</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Upload Page</span>
+<span class="sd">    Lets the user upload a video of performing an exercise</span>
+<span class="sd">    After the video is uploaded, pose estimation and evaluation is done before directing to the userpage</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">aws_access_key_id</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;AWS_ACCESS_KEY_ID&#39;</span><span class="p">)</span>
+    <span class="n">aws_secret_access_key</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;AWS_SECRET_ACCESS_KEY&#39;</span><span class="p">)</span>
+    <span class="n">bucket_name</span> <span class="o">=</span> <span class="s2">&quot;swolemate-s3&quot;</span>
+    <span class="n">s3_location</span> <span class="o">=</span> <span class="s1">&#39;https://s3.console.aws.amazon.com/s3/buckets/swolemate-s3&#39;</span>
+
+    <span class="c1"># upload a file from a client machine. </span>
+    <span class="n">file</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">UploadFileForm</span><span class="p">()</span> 
+    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="n">workout_type</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">classes</span><span class="o">.</span><span class="n">WORKOUT_CHOICES</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">exercise_selection</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">side</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">classes</span><span class="o">.</span><span class="n">SIDE_CHOICES</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">file</span><span class="o">.</span><span class="n">side_selection</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        
+        <span class="n">f</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">file_selector</span><span class="o">.</span><span class="n">data</span>  <span class="c1"># f : Data of FileField</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">secure_filename</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        
+        <span class="n">f</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="s1">&#39;videos&#39;</span><span class="p">,</span> <span class="n">filename</span>
+        <span class="p">))</span>
+
+        <span class="c1"># Pose Estimation Model </span>
+        <span class="n">items</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span>
+            <span class="s1">&#39;python3&#39;</span><span class="p">,</span> <span class="s1">&#39;detectron2/demo.py&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;--config-file&#39;</span><span class="p">,</span> <span class="s1">&#39;detectron2_repo/configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;--video-input&#39;</span><span class="p">,</span> <span class="s1">&#39;videos/&#39;</span> <span class="o">+</span> <span class="n">filename</span><span class="p">,</span>
+            <span class="s1">&#39;--output&#39;</span><span class="p">,</span> <span class="s1">&#39;output/&#39;</span> <span class="o">+</span> <span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;--opts&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;MODEL.WEIGHTS&#39;</span><span class="p">,</span> <span class="s1">&#39;detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;MODEL.DEVICE&#39;</span><span class="p">,</span> <span class="s1">&#39;cpu&#39;</span><span class="p">,</span>
+        <span class="p">])</span>
+        
+        <span class="c1"># model evaluation</span>
+        <span class="n">json_file_name</span> <span class="o">=</span> <span class="s1">&#39;output/&#39;</span> <span class="o">+</span> <span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">load_tester</span><span class="p">(</span><span class="n">json_file_name</span><span class="p">)</span>
+        <span class="n">X_train_names</span> <span class="o">=</span> <span class="n">files_in_order</span><span class="p">(</span><span class="s1">&#39;poses_compressed/bicep&#39;</span><span class="p">)</span>
+        <span class="n">y_train</span> <span class="o">=</span> <span class="n">get_labels</span><span class="p">(</span><span class="n">X_train_names</span><span class="p">)</span>
+        <span class="n">X_train_1</span><span class="p">,</span> <span class="n">X_train_2</span> <span class="o">=</span> <span class="n">load_features</span><span class="p">(</span><span class="n">X_train_names</span><span class="p">)</span>
+        
+        <span class="k">global</span> <span class="n">value</span>
+        <span class="k">global</span> <span class="n">uploaded_file</span>
+        <span class="k">global</span> <span class="n">range_ang_1</span>
+        <span class="k">global</span> <span class="n">range_ang_2</span>
+        <span class="k">global</span> <span class="n">range_user_ang_1</span>
+        <span class="k">global</span> <span class="n">range_user_ang_2</span>
+        <span class="k">global</span> <span class="n">label</span>
+        <span class="k">global</span> <span class="n">first_time</span>
+        
+        <span class="c1"># update all global variables </span>
+        <span class="n">value</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">range_ang_1</span><span class="p">,</span> <span class="n">range_ang_2</span><span class="p">,</span> <span class="n">range_user_ang_1</span><span class="p">,</span> <span class="n">range_user_ang_2</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">kmeans_test</span><span class="p">([</span><span class="s1">&#39;demo&#39;</span><span class="p">],</span> <span class="n">X_train_names</span><span class="p">,</span> <span class="n">X_train_1</span><span class="o">=</span><span class="n">X_train_1</span><span class="p">,</span> <span class="n">X_train_2</span><span class="o">=</span><span class="n">X_train_2</span><span class="p">,</span> <span class="n">y_train</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="n">side</span><span class="p">,</span> <span class="n">bool_val</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exercise</span><span class="o">=</span><span class="n">workout_type</span><span class="p">)</span>
+        <span class="n">first_time</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="c1"># send video to s3 so that it can be viewed on the userpage</span>
+        <span class="n">session</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">&quot;s3&quot;</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">Bucket</span><span class="p">(</span><span class="n">bucket_name</span><span class="p">)</span>\
+            <span class="o">.</span><span class="n">upload_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;videos&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="n">uploaded_file</span> <span class="o">=</span> <span class="s1">&#39;https://swolemate-s3.s3.us-west-2.amazonaws.com/&#39;</span> <span class="o">+</span> <span class="n">filename</span>
+        
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;userpage&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;upload.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">file</span><span class="p">,</span><span class="n">authenticated_user</span><span class="o">=</span><span class="n">current_user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="register"><a class="viewcode-back" href="../../code.html#app.routes.register">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/register&#39;</span><span class="p">,</span>  <span class="n">methods</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">register</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Registration page, allows user to create an account</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">registration_form</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">RegistrationForm</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">registration_form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">registration_form</span><span class="o">.</span><span class="n">username</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">email</span> <span class="o">=</span> <span class="n">registration_form</span><span class="o">.</span><span class="n">email</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">registration_form</span><span class="o">.</span><span class="n">password</span><span class="o">.</span><span class="n">data</span>
+
+
+        <span class="n">user_count</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">User</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> \
+            <span class="o">+</span> <span class="n">classes</span><span class="o">.</span><span class="n">User</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">email</span><span class="o">=</span><span class="n">email</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">user_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;&lt;h1&gt;Error - Existing user : &#39;</span> <span class="o">+</span> <span class="n">username</span> \
+                   <span class="o">+</span> <span class="s1">&#39; OR &#39;</span> <span class="o">+</span> <span class="n">email</span> <span class="o">+</span> <span class="s1">&#39;&lt;/h1&gt;&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">user</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">User</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+            <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="n">db</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;login&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;register.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">registration_form</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="login"><a class="viewcode-back" href="../../code.html#app.routes.login">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">login</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allows user to login</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">login_form</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">LogInForm</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">login_form</span><span class="o">.</span><span class="n">validate_on_submit</span><span class="p">():</span>
+        <span class="n">username</span> <span class="o">=</span> <span class="n">login_form</span><span class="o">.</span><span class="n">username</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">login_form</span><span class="o">.</span><span class="n">password</span><span class="o">.</span><span class="n">data</span>
+        <span class="c1"># Look for it in the database.</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">User</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+
+        <span class="c1"># Login and validate the user.</span>
+        <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">user</span><span class="o">.</span><span class="n">check_password</span><span class="p">(</span><span class="n">password</span><span class="p">):</span>
+            <span class="n">login_user</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;upload&#39;</span><span class="p">))</span>
+            <span class="c1"># return(&quot;&lt;h1&gt; Welcome {}!&lt;/h1&gt;&quot;.format(username))</span>
+
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;login.html&#39;</span><span class="p">,</span> <span class="n">form</span><span class="o">=</span><span class="n">login_form</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="logout"><a class="viewcode-back" href="../../code.html#app.routes.logout">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/logout&#39;</span><span class="p">)</span>
+<span class="nd">@login_required</span>
+<span class="k">def</span> <span class="nf">logout</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allows user to logout</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logout_user</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="n">url_for</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="plot_png"><a class="viewcode-back" href="../../code.html#app.routes.plot_png">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/plot.png&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">plot_png</span><span class="p">():</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">classes</span><span class="o">.</span><span class="n">create_figure</span><span class="p">()</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">()</span>
+    <span class="n">FigureCanvas</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span><span class="o">.</span><span class="n">print_png</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">getvalue</span><span class="p">(),</span> <span class="n">mimetype</span><span class="o">=</span><span class="s1">&#39;image/png&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="userpage"><a class="viewcode-back" href="../../code.html#app.routes.userpage">[docs]</a><span class="nd">@application</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/userpage&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="nd">@login_required</span>
+<span class="k">def</span> <span class="nf">userpage</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Userpage includes all information about the form of the inputted exercises such as: </span>
+<span class="sd">    - numerical value encoding how good/bad the exercise is</span>
+<span class="sd">    - plot showing distance in angles between two poses between inputted exercise and all training samples</span>
+<span class="sd">    - plots showing frame by frame angles between </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;userpage.html&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">current_user</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">video_name</span><span class="o">=</span><span class="n">uploaded_file</span><span class="p">,</span> 
+                          <span class="n">range_ang_1</span><span class="o">=</span><span class="n">range_ang_1</span><span class="p">,</span> <span class="n">range_ang_2</span><span class="o">=</span><span class="n">range_ang_2</span><span class="p">,</span> <span class="n">range_user_ang_1</span><span class="o">=</span><span class="n">range_user_ang_1</span><span class="p">,</span> 
+                           <span class="n">range_user_ang_2</span><span class="o">=</span><span class="n">range_user_ang_2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">first_time</span><span class="o">=</span><span class="n">first_time</span><span class="p">,</span> 
+                           <span class="n">authenticated_user</span><span class="o">=</span><span class="n">current_user</span><span class="o">.</span><span class="n">is_authenticated</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">Swolemate</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code.html">Auto Generated Code Documentation</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Bolian Liu, Daniel Carrera, Elyse Cheung-Sutton, Kris Johnson, Kexin Wang, Moh Kaddoura, Suren Gunturu, Wenyao Zhang.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

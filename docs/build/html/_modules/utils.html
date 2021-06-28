@@ -1,0 +1,420 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>utils &#8212; Swolemate  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">scipy.signal</span> <span class="kn">import</span> <span class="n">medfilt</span>
+
+<span class="kn">from</span> <span class="nn">poses</span> <span class="kn">import</span> <span class="n">PoseSequence</span>
+
+
+<div class="viewcode-block" id="split_num"><a class="viewcode-back" href="../code.html#utils.split_num">[docs]</a><span class="k">def</span> <span class="nf">split_num</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">head</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;0123456789&quot;</span><span class="p">)</span>
+    <span class="n">tail</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">head</span><span class="p">)</span> <span class="p">:]</span>
+    <span class="k">return</span> <span class="n">head</span><span class="p">,</span> <span class="n">tail</span></div>
+
+
+<div class="viewcode-block" id="files_in_order"><a class="viewcode-back" href="../code.html#utils.files_in_order">[docs]</a><span class="k">def</span> <span class="nf">files_in_order</span><span class="p">(</span><span class="n">folderpath</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        Folder with compressed npy save files of good and bad exercises</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        npy_files (numpy.array): ordered array of good then bad exercises</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">npy_files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">folderpath</span><span class="p">)</span>
+    <span class="n">no_extensions</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">npy_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">npy_file</span> <span class="ow">in</span> <span class="n">npy_files</span><span class="p">]</span>
+    <span class="n">splitted</span> <span class="o">=</span> <span class="p">[</span><span class="n">split_num</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">no_extensions</span><span class="p">]</span>
+    <span class="n">splitted</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">splitted</span><span class="p">)</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">lexsort</span><span class="p">((</span><span class="n">splitted</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="n">splitted</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]))</span>
+    <span class="n">npy_files</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">npy_files</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">npy_files</span><span class="p">[</span><span class="n">indices</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="get_labels"><a class="viewcode-back" href="../code.html#utils.get_labels">[docs]</a><span class="k">def</span> <span class="nf">get_labels</span><span class="p">(</span><span class="n">array</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        array (numpy.array): Turns filenames into appropriate lables</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.array(): numpy array of 1&#39;s and 0&#39;s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="s2">&quot;good&quot;</span> <span class="ow">in</span> <span class="n">i</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">array</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_tester"><a class="viewcode-back" href="../code.html#utils.load_tester">[docs]</a><span class="k">def</span> <span class="nf">load_tester</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load the json file</span>
+<span class="sd">    Arguments: </span>
+<span class="sd">        path(str): path to the json file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="load_ps"><a class="viewcode-back" href="../code.html#utils.load_ps">[docs]</a><span class="k">def</span> <span class="nf">load_ps</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Load a PoseSequence object from a given numpy file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        filename: file name of the numpy file containing keypoints.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        PoseSequence object with normalized joint keypoints.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">all_keypoints</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>  <span class="c1"># has all the keypoints</span>
+    <span class="k">return</span> <span class="n">PoseSequence</span><span class="p">(</span><span class="n">all_keypoints</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DTWDistance"><a class="viewcode-back" href="../code.html#utils.DTWDistance">[docs]</a><span class="k">def</span> <span class="nf">DTWDistance</span><span class="p">(</span><span class="n">s1</span><span class="p">,</span> <span class="n">s2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dynamic Time Warping Distance, code from http://alexminnaar.com/,</span>
+<span class="sd">    the Time Series clustering with python post. Does a recursive function to</span>
+<span class="sd">    find the shortest path through matrix of distances between each element in</span>
+<span class="sd">    s1 and s2 (so s1.len by s2.len shaped matrix).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        s1 (np.array): first time series</span>
+<span class="sd">        s2 (np.array): second time series</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        (float): distance between</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">DTW</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">)):</span>
+        <span class="n">DTW</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s2</span><span class="p">)):</span>
+        <span class="n">DTW</span><span class="p">[(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+    <span class="n">DTW</span><span class="p">[(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">s2</span><span class="p">)):</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="p">(</span><span class="n">s1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">s2</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">DTW</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)]</span> <span class="o">=</span> <span class="n">dist</span> <span class="o">+</span> <span class="nb">min</span><span class="p">(</span><span class="n">DTW</span><span class="p">[(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">)],</span> <span class="n">DTW</span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">DTW</span><span class="p">[(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)])</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">DTW</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">s1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="load_features"><a class="viewcode-back" href="../code.html#utils.load_features">[docs]</a><span class="k">def</span> <span class="nf">load_features</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">exercise</span><span class="o">=</span><span class="s1">&#39;Bicep Curl&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bool_val</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given</span>
+<span class="sd">    Side --&gt; encoded as left or right from user uploaded videos (without confidence encoded)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        names (list): list of either filenames gotten from files_in_order (set bool_val to False)</span>
+<span class="sd">        data (np.array): numpy array of keypoints</span>
+<span class="sd">        side (str): &#39;left&#39; or &#39;right, for which side is seen in the video</span>
+<span class="sd">        bool_val (Boolean): T/F for whether data and side are used (should refactor this out)</span>
+<span class="sd">        exercise (str): &#39;bicep&#39;, &#39;shoulderpress&#39;, or &#39;frontraise&#39; accepted - what body angles to output</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        output1 (list): list of key skeletal angle, e.g. upper arm torso angle for bicep curls</span>
+<span class="sd">        output2 (list): list of second key skeletal angle</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">output1</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># List of upper arm torso angles</span>
+    <span class="n">output2</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># List of forearm upper arm angles</span>
+
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">bool_val</span><span class="p">:</span> 
+            <span class="n">ps</span> <span class="o">=</span> <span class="n">load_ps</span><span class="p">(</span><span class="s1">&#39;poses_compressed/bicep/&#39;</span><span class="o">+</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="n">ps</span> <span class="o">=</span> <span class="n">PoseSequence</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">poses</span> <span class="o">=</span> <span class="n">ps</span><span class="o">.</span><span class="n">poses</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">bool_val</span><span class="p">:</span> 
+            <span class="n">right_present</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">for</span> <span class="n">pose</span> <span class="ow">in</span> <span class="n">poses</span> 
+                    <span class="k">if</span> <span class="n">pose</span><span class="o">.</span><span class="n">right_shoulder</span><span class="o">.</span><span class="n">exists</span> <span class="ow">and</span> <span class="n">pose</span><span class="o">.</span><span class="n">right_elbow</span><span class="o">.</span><span class="n">exists</span> <span class="ow">and</span> <span class="n">pose</span><span class="o">.</span><span class="n">right_wrist</span><span class="o">.</span><span class="n">exists</span><span class="p">]</span> <span class="c1"># check if right poses exist</span>
+            <span class="n">left_present</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">for</span> <span class="n">pose</span> <span class="ow">in</span> <span class="n">poses</span>
+                    <span class="k">if</span> <span class="n">pose</span><span class="o">.</span><span class="n">left_shoulder</span><span class="o">.</span><span class="n">exists</span> <span class="ow">and</span> <span class="n">pose</span><span class="o">.</span><span class="n">left_elbow</span><span class="o">.</span><span class="n">exists</span> <span class="ow">and</span> <span class="n">pose</span><span class="o">.</span><span class="n">left_wrist</span><span class="o">.</span><span class="n">exists</span><span class="p">]</span> <span class="c1"># check if left poses exist</span>
+            <span class="n">right_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">right_present</span><span class="p">)</span>
+            <span class="n">left_count</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">left_present</span><span class="p">)</span>
+            <span class="n">side</span> <span class="o">=</span> <span class="s1">&#39;right&#39;</span> <span class="k">if</span> <span class="n">right_count</span> <span class="o">&gt;</span> <span class="n">left_count</span> <span class="k">else</span> <span class="s1">&#39;left&#39;</span>
+        
+        <span class="k">if</span> <span class="n">side</span> <span class="o">==</span> <span class="s1">&#39;right&#39;</span><span class="p">:</span>
+            <span class="n">joints</span> <span class="o">=</span> <span class="p">[(</span><span class="n">pose</span><span class="o">.</span><span class="n">right_shoulder</span><span class="p">,</span> <span class="n">pose</span><span class="o">.</span><span class="n">right_elbow</span><span class="p">,</span> <span class="n">pose</span><span class="o">.</span><span class="n">right_wrist</span><span class="p">,</span> <span class="n">pose</span><span class="o">.</span><span class="n">right_hip</span><span class="p">,</span> <span class="n">pose</span><span class="o">.</span><span class="n">neck</span><span class="p">)</span> <span class="k">for</span> <span class="n">pose</span> <span class="ow">in</span> <span class="n">poses</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">joints</span> <span class="o">=</span> <span class="p">[(</span><span class="n">pose</span><span class="o">.</span><span class="n">left_shoulder</span><span class="p">,</span> <span class="n">pose</span><span class="o">.</span><span class="n">left_elbow</span><span class="p">,</span> <span class="n">pose</span><span class="o">.</span><span class="n">left_wrist</span><span class="p">,</span> <span class="n">pose</span><span class="o">.</span><span class="n">left_hip</span><span class="p">,</span> <span class="n">pose</span><span class="o">.</span><span class="n">neck</span><span class="p">)</span> <span class="k">for</span> <span class="n">pose</span> <span class="ow">in</span> <span class="n">poses</span><span class="p">]</span>
+
+        <span class="c1"># filter out data points where a part does not exist</span>
+        <span class="n">joints</span> <span class="o">=</span> <span class="p">[</span><span class="n">joint</span> <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="n">joints</span> <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">exists</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">joint</span><span class="p">)]</span>
+        
+        <span class="c1"># for shoulderpress</span>
+        <span class="n">back_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">joint</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">joint</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">joint</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">joint</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="n">joints</span><span class="p">])[:,</span> <span class="mi">0</span><span class="p">]</span>
+        
+         <span class="c1"># Shoulder to elbow (upper arm)</span>
+        <span class="n">upper_arm_vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">joint</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">joint</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">joint</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">joint</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="n">joints</span><span class="p">])</span>
+        
+        <span class="c1"># Neck to hip (torso)</span>
+        <span class="n">torso_vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">joint</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">joint</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">joint</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">joint</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="n">joints</span><span class="p">])</span>
+        
+        <span class="c1"># Elbow to wrist (forearm)</span>
+        <span class="n">forearm_vecs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([(</span><span class="n">joint</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">joint</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">joint</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">joint</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="n">joints</span><span class="p">])</span>
+        
+        <span class="c1"># normalize portion: SAME FOR ALL EXERCISES</span>
+        <span class="n">upper_arm_vecs</span> <span class="o">=</span> <span class="n">upper_arm_vecs</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">upper_arm_vecs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">torso_vecs</span> <span class="o">=</span> <span class="n">torso_vecs</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">torso_vecs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">forearm_vecs</span> <span class="o">=</span> <span class="n">forearm_vecs</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">forearm_vecs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="c1"># get all the angles and median filter them</span>
+        <span class="n">upper_arm_torso_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">upper_arm_vecs</span><span class="p">,</span> <span class="n">torso_vecs</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="n">upper_arm_torso_angle_filtered</span> <span class="o">=</span> <span class="n">medfilt</span><span class="p">(</span><span class="n">medfilt</span><span class="p">(</span><span class="n">upper_arm_torso_angle</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="mi">5</span><span class="p">)</span>  <span class="c1"># size 5 median filter twice</span>
+
+        <span class="n">upper_arm_forearm_angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">upper_arm_vecs</span><span class="p">,</span> <span class="n">forearm_vecs</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="n">upper_arm_forearm_angle_filtered</span> <span class="o">=</span> <span class="n">medfilt</span><span class="p">(</span>
+            <span class="n">medfilt</span><span class="p">(</span><span class="n">upper_arm_forearm_angle</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="mi">5</span>
+        <span class="p">)</span>  <span class="c1"># size 5 median filter twice</span>
+
+        <span class="k">if</span> <span class="n">exercise</span> <span class="o">==</span> <span class="s2">&quot;Shoulder Press&quot;</span><span class="p">:</span>
+            <span class="n">output1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">back_vec</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">output2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">upper_arm_forearm_angle_filtered</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">exercise</span> <span class="o">==</span> <span class="s2">&quot;Bicep Curl&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">exercise</span> <span class="o">==</span> <span class="s2">&quot;Front Raise&quot;</span><span class="p">):</span>
+            <span class="n">output1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">upper_arm_torso_angle_filtered</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="n">output2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">upper_arm_forearm_angle_filtered</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">output1</span><span class="p">,</span> <span class="n">output2</span></div>
+
+<div class="viewcode-block" id="kmeans_test"><a class="viewcode-back" href="../code.html#utils.kmeans_test">[docs]</a><span class="k">def</span> <span class="nf">kmeans_test</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">X_train_names</span><span class="p">,</span> <span class="n">X_train_1</span><span class="p">,</span> <span class="n">X_train_2</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bool_val</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">exercise</span><span class="o">=</span><span class="s2">&quot;Bicep Curl&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluating the given inputted exercise based on training data</span>
+<span class="sd">    Arguments: </span>
+<span class="sd">        names(str): name of the file</span>
+<span class="sd">        X_train_names(list): list of training file names</span>
+<span class="sd">        X_train_1(list): list of values representing the first feature of the video exercise</span>
+<span class="sd">        X_train_2(list): list of values representing the second feature of the video exercise</span>
+<span class="sd">        y_train(list): Labels of the training samples as either good or bad form</span>
+<span class="sd">        data(list): if loaded from external json file, data of json file is supplied here</span>
+<span class="sd">        side(str): if loaded from external json file, must specify side as either left or right facing in the point of view </span>
+<span class="sd">            of the camera</span>
+<span class="sd">        bool_val(boolean): whether loading from external json file (True), or taking from poses_compressed folder (False)</span>
+<span class="sd">        exercise(str): what exercise is specified from dropdown in web page</span>
+<span class="sd">    Returns: </span>
+<span class="sd">        percentage(float): </span>
+<span class="sd">        analysis(list): </span>
+<span class="sd">        predictions(list):  </span>
+<span class="sd">        range_ang_1(float):  </span>
+<span class="sd">        range_ang_2(float): </span>
+<span class="sd">        range_user_ang_1(float): </span>
+<span class="sd">        range_user_ang_2(float): </span>
+<span class="sd">        label(boolean): </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">bool_val</span><span class="p">:</span>
+        <span class="n">X_test_1</span><span class="p">,</span> <span class="n">X_test_2</span> <span class="o">=</span> <span class="n">load_features</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">exercise</span><span class="o">=</span><span class="n">exercise</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">X_test_1</span><span class="p">,</span> <span class="n">X_test_2</span> <span class="o">=</span> <span class="n">load_features</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">exercise</span><span class="o">=</span><span class="n">exercise</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="n">side</span><span class="p">,</span> <span class="n">bool_val</span><span class="o">=</span><span class="n">bool_val</span><span class="p">)</span>
+    <span class="n">predictions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">analysis</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">exercise</span> <span class="o">==</span> <span class="s1">&#39;Bicep Curl&#39;</span><span class="p">:</span> 
+        <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;Angles between Upper Arm and Torso&#39;</span>
+    <span class="k">elif</span> <span class="n">exercise</span> <span class="o">==</span> <span class="s1">&#39;Shoulder Press&#39;</span><span class="p">:</span> 
+        <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;Movement of Back&#39;</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">&#39;good&#39;</span> <span class="ow">in</span> <span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">X_train_names</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">X_train_names_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X_train_names</span><span class="p">)</span>
+    <span class="n">X_train_1_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X_train_1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">X_train_2_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X_train_2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">range_ang_1</span><span class="p">,</span> <span class="n">range_ang_2</span> <span class="o">=</span> <span class="n">plot_angles</span><span class="p">(</span><span class="n">X_train_names_arr</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">X_train_1_arr</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">X_train_2_arr</span><span class="p">[</span><span class="n">idx</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="p">,</span> <span class="n">exercise</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)):</span>
+        <span class="c1"># Store the average distance to good and bad training examples</span>
+        <span class="n">f1_good</span><span class="p">,</span> <span class="n">f1_bad</span><span class="p">,</span> <span class="n">f2_good</span><span class="p">,</span> <span class="n">f2_bad</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+
+        <span class="c1"># Compare distance of current test example with all training examples</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_train_1</span><span class="p">)):</span>
+            <span class="n">dist1</span> <span class="o">=</span> <span class="n">DTWDistance</span><span class="p">(</span><span class="n">X_train_1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">X_test_1</span><span class="p">[</span><span class="n">example</span><span class="p">])</span>
+            <span class="n">dist2</span> <span class="o">=</span> <span class="n">DTWDistance</span><span class="p">(</span><span class="n">X_train_2</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">X_test_2</span><span class="p">[</span><span class="n">example</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">y_train</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="n">f1_good</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist1</span><span class="p">)</span>
+                <span class="n">f2_good</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist2</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">f1_bad</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist1</span><span class="p">)</span>
+                <span class="n">f2_bad</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist2</span><span class="p">)</span>
+
+        <span class="n">f1_good</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">f1_good</span><span class="p">)</span>
+        <span class="n">f2_bad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">f2_bad</span><span class="p">)</span>
+        <span class="n">f2_good</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">f2_good</span><span class="p">)</span>
+        <span class="n">f1_bad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">f1_bad</span><span class="p">)</span>
+
+        <span class="c1"># sort good indices in first dimension</span>
+        <span class="n">good_idx_sort</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">f1_good</span><span class="p">)</span>
+        <span class="n">bad_idx_sort</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">f1_bad</span><span class="p">)</span>
+
+        <span class="n">f1_good</span> <span class="o">=</span> <span class="n">f1_good</span><span class="p">[</span><span class="n">good_idx_sort</span><span class="p">]</span>
+        <span class="n">f2_good</span> <span class="o">=</span> <span class="n">f2_good</span><span class="p">[</span><span class="n">good_idx_sort</span><span class="p">]</span>
+        <span class="n">f1_bad</span> <span class="o">=</span> <span class="n">f1_bad</span><span class="p">[</span><span class="n">bad_idx_sort</span><span class="p">]</span>
+        <span class="n">f2_bad</span> <span class="o">=</span> <span class="n">f2_bad</span><span class="p">[</span><span class="n">bad_idx_sort</span><span class="p">]</span>
+        
+        <span class="c1"># Plotting points</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">f1_good</span><span class="p">,</span> <span class="n">f2_good</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Distance to Good Form Ex.&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">f1_bad</span><span class="p">,</span> <span class="n">f2_bad</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Distance to Bad Form Ex.&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;Distance using Upper Arm Torso Angle (in Degrees)&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;Distance using Upper Arm Forearm Angle (in Degrees)&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Distance between </span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">example</span><span class="p">]</span><span class="si">}</span><span class="s2"> and Good/Bad Examples&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">1.05</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">,</span> <span class="n">borderaxespad</span><span class="o">=</span><span class="mf">0.</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;app/static/assets/image.jpg&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="n">good_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">f1_good</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">f2_good</span><span class="p">)</span>
+        <span class="n">bad_score</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">f1_bad</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">f2_bad</span><span class="p">)</span>
+
+        <span class="n">percentage</span> <span class="o">=</span> <span class="p">(</span><span class="n">good_score</span> <span class="o">-</span> <span class="n">bad_score</span><span class="p">)</span> <span class="o">/</span> <span class="n">bad_score</span> <span class="o">*</span> <span class="mi">100</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># percentage</span>
+        <span class="n">percentage</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">percentage</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        
+        <span class="n">range_user_ang_1</span><span class="p">,</span> <span class="n">range_user_ang_2</span> <span class="o">=</span> <span class="n">plot_angles</span><span class="p">([</span><span class="s1">&#39;Demo&#39;</span><span class="p">],</span> <span class="n">X_test_1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">X_test_2</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">exercise</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">str_val</span><span class="o">=</span><span class="s1">&#39;Inputted_Form&#39;</span><span class="p">)</span>
+        
+        <span class="c1"># if distance is closer to good form exercises</span>
+        <span class="k">if</span> <span class="n">good_score</span> <span class="o">&lt;</span> <span class="n">bad_score</span><span class="p">:</span>
+            <span class="n">predictions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">analysis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Exercise Performed Correctly&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># distance close to bad form exercises</span>
+            <span class="n">predictions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">analysis</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Exercise needs some work&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">percentage</span><span class="p">,</span> <span class="n">analysis</span><span class="p">,</span> <span class="n">predictions</span><span class="p">,</span> <span class="n">range_ang_1</span><span class="p">,</span> <span class="n">range_ang_2</span><span class="p">,</span> <span class="n">range_user_ang_1</span><span class="p">,</span> <span class="n">range_user_ang_2</span><span class="p">,</span> <span class="n">label</span></div>
+
+<div class="viewcode-block" id="plot_angles"><a class="viewcode-back" href="../code.html#utils.plot_angles">[docs]</a><span class="k">def</span> <span class="nf">plot_angles</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">angle_1</span><span class="p">,</span> <span class="n">angle_2</span><span class="p">,</span> <span class="n">exercise</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">str_val</span><span class="o">=</span><span class="s1">&#39;Good_Form&#39;</span><span class="p">):</span>  
+    <span class="c1"># Generate plots</span>
+    <span class="c1"># plt.scatter(np.arange(upper_arm_torso_angle.shape[0]),upper_arm_torso_angle, alpha=0.5)</span>
+    <span class="n">angle_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">angle_1</span><span class="p">)</span>
+    <span class="n">range_ang_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">angle_1</span><span class="p">)</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">angle_1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">angle_1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">angle_1</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Frames&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+    <span class="c1"># Set range on y-axis so the plots are consistent</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">90</span><span class="p">)</span> 
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;app/static/assets/&#39;</span> <span class="o">+</span> <span class="n">str_val</span> <span class="o">+</span> <span class="s1">&#39;1.jpg&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="n">upper_forearm_angle_filtered</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">angle_2</span><span class="p">)</span>
+    <span class="n">range_ang_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">upper_forearm_angle_filtered</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">upper_forearm_angle_filtered</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">upper_forearm_angle_filtered</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Angle between Upper Arm and Forearm for </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Frames&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Angle between Upper Arm and Forearm&#39;</span><span class="p">)</span>
+    <span class="c1"># Set range on y-axis so the plots are consistent</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">180</span><span class="p">)</span> 
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;app/static/assets/&#39;</span> <span class="o">+</span> <span class="n">str_val</span> <span class="o">+</span> <span class="s1">&#39;2.jpg&#39;</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">&quot;tight&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">range_ang_1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">range_ang_2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">json_file_name</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">side</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">exercise</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">side</span> <span class="o">!=</span> <span class="s1">&#39;left&#39;</span> <span class="ow">and</span> <span class="n">side</span> <span class="o">!=</span> <span class="s1">&#39;right&#39;</span><span class="p">:</span> 
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Invalid side type, can only take on values: left or right&quot;</span><span class="p">)</span>
+        <span class="n">exit</span><span class="p">()</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">load_tester</span><span class="p">(</span><span class="n">json_file_name</span><span class="p">)</span>
+    
+    <span class="n">X_train_names</span> <span class="o">=</span> <span class="n">files_in_order</span><span class="p">(</span><span class="s1">&#39;poses_compressed/bicep&#39;</span><span class="p">)</span>
+    <span class="n">y_train</span> <span class="o">=</span> <span class="n">get_labels</span><span class="p">(</span><span class="n">X_train_names</span><span class="p">)</span>
+    
+    <span class="c1">#new_data = load_tester(&#39;moh_bicep_curl_ex.json&#39;)</span>
+    
+    <span class="n">X_train_1</span><span class="p">,</span> <span class="n">X_train_2</span> <span class="o">=</span> <span class="n">load_features</span><span class="p">(</span><span class="n">X_train_names</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">kmeans_test</span><span class="p">([</span><span class="s1">&#39;demo&#39;</span><span class="p">],</span> <span class="n">X_train_1</span><span class="o">=</span><span class="n">X_train_1</span><span class="p">,</span> <span class="n">X_train_2</span><span class="o">=</span><span class="n">X_train_2</span><span class="p">,</span> <span class="n">y_train</span><span class="o">=</span><span class="n">y_train</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">side</span><span class="o">=</span><span class="n">side</span><span class="p">,</span> <span class="n">bool_val</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exercise</span><span class="o">=</span><span class="n">exercise</span><span class="p">))</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Swolemate</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../code.html">Auto Generated Code Documentation</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Bolian Liu, Daniel Carrera, Elyse Cheung-Sutton, Kris Johnson, Kexin Wang, Moh Kaddoura, Suren Gunturu, Wenyao Zhang.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
