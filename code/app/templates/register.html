@@ -1,5 +1,10 @@
-{% extends "bootstrap/base.html" %}
+{% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
+
+{% block head %}
+{{ super() }}
+{% include "ga.html" %}
+{% endblock %}
 
 {% block title %}
 Register
@@ -10,6 +15,8 @@ Register
 <div class="container">
 
     <form method="POST"> <!-- post : handle submission -->
+	<br>
+	<br>
         <h2> Sign Up </h2>
         {{ form.hidden_tag() }}
         {{ wtf.form_field(form.username) }}

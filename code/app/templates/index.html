@@ -1,9 +1,14 @@
 {% extends "base.html" %} 
 
+{% block head %}
+{{ super() }}
+{% include "ga.html" %}
+{% endblock %}
+
 {% block content %}
 
         <!-- Image Showcases-->
-        <section class="showcase">
+        <section class="showcase", id="about">
             <div class="container-fluid p-0">
                 <div class="row g-0">
 
@@ -44,7 +49,7 @@
 
 
         <!-- Testimonials 1 of 3-->
-        <section class="testimonials text-center bg-light">
+        <section class="testimonials text-center bg-light", id="team">
             <div class="container">
                 <h2 class="mb-5">Meet the team!</h2>
                 <div class="row">

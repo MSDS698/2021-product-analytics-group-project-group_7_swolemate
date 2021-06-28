@@ -1,5 +1,10 @@
 {% import "bootstrap/wtf.html" as wtf %}
-{% extends "bootstrap/base.html" %}
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+{% include "ga.html" %}
+{% endblock %}
 
 {% block title %}
 File Upload
@@ -9,7 +14,12 @@ File Upload
 {% block content %}
 <div class="container">
     <form method="POST" enctype="multipart/form-data">
+	<br>	
+	<br>
         <h2>Upload</h2>
+	<h2>Please load a recording of your workout.</h2>
+	<h4>note: currently in beta version, please ensure workout is of one repetition"</h4>
+	<br>
         {{ form.csrf_token }}
         {{ wtf.form_field(form.file_selector) }}
         {{ wtf.form_field(form.exercise_selection) }}

@@ -1,5 +1,10 @@
 {% import "bootstrap/wtf.html" as wtf %}
-{% extends "bootstrap/base.html" %}
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+{% include "ga.html" %}
+{% endblock %}
 
 {% block title %}
 Login
@@ -10,6 +15,8 @@ Login
 {% block content %}
 <div class="container">
     <form method="POST">
+	<br>
+	<br>
         <h2>Login</h2>
         {{ form.hidden_tag() }}
         {{ wtf.form_field(form.username) }}

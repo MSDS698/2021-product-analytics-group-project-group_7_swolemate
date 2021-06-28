@@ -1,4 +1,10 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+{% include "ga.html" %}
+{% endblock %}
+
 <html>
 <head>
   <title>Video Example</title>
@@ -23,25 +29,13 @@
     Your browser does not support the video tag.
   </video>
   {% endif %} 
+
     
  {% if first_time == 0 %}
  <div class="slidecontainer">
   <h2>Percentage Numerical Value</h2>
     {{value}}
   <input type="range" min="-100" max="100" value={{value}} class="slider" id="myRange", list="tickmarks">
-  <datalist id="tickmarks">
-      <option value="0" label="-100%"></option>
-      <option value="10"></option>
-      <option value="20"></option>
-      <option value="30"></option>
-      <option value="40"></option>
-      <option value="50" label="0%"></option>
-      <option value="60"></option>
-      <option value="70"></option>
-      <option value="80"></option>
-      <option value="90"></option>
-      <option value="100" label="100%"></option>
-    </datalist>
 </div>
 <style>
     .slidecontainer {
