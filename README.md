@@ -6,9 +6,11 @@
 
 *Providing Hollywood level training in the comfort of your home*
 
-**CEO**: Kexin Wang <br>
-**Front End**:  Elyse Cheung-Sutton, Daniel Carrera, Moh Kaddoura <br>
-**Back End**: Suren Gunturu, Kristofor Johnson, Wenyao Zhang, Boliang Liu
+**CEO**: [Kexin Wang](https://www.linkedin.com/in/sheena-kexin-wang-3a51b7170/) <br>
+**CTO**: [Daniel Carrera](https://www.linkedin.com/in/daniel-carrera/) <br>
+**Data Scientist**:  [Elyse Cheung-Sutton](https://www.linkedin.com/in/elysecs), [Moh Kaddoura](https://www.linkedin.com/in/moh-kaddoura/) <br>
+**Engineer**: [Boliang Liu](https://www.linkedin.com/in/boliang-liu/), [Kristofor Johnson](https://www.linkedin.com/in/kr-johnson/),
+              [Suren Gunturu](https://www.linkedin.com/in/suren-gunturu/), [Wenyao Zhang](https://www.linkedin.com/in/wenyao-zhang/) <br>
 
 <img src = './readme/new_image_girl.png' height = 250>   <img src = './readme/new_image_boy.png' height = 250>
 
@@ -22,6 +24,13 @@ Steps To Run:
 5) After Login, automatically redirect to the Upload Page and upload a video with a dropdown of the given exercise and submit
 6) After submitting, if there is an error, manually redirect to "localhost/userpage", otherwise it will automatically redirect
 
+## Model
+
+We used Detectron2, which is developed by Facebook AI Research, to detect the movements of human joint points in vedios. And We used the outputs of pose estimation to evaluate videos of professional trainers and users through human pose keypoints. In this project, we evaluated three exercises: bicep curl, front raise, and shoulder press.
+
+References: <br>
+https://github.com/facebookresearch/detectron2 <br>
+https://github.com/stevenzchen/pose-trainer
 
 ## Trello Project Management <img src = './readme/trello2.jpeg' height = 20>
 
