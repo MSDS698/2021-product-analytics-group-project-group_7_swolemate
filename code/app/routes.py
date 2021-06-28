@@ -100,8 +100,9 @@ def upload():
         
         """if request.args.get('debug') != "":
             return send_file('/app/output/' + items[0] + '.json')"""
-        
-        return redirect(url_for('userpage'))  # Redirect to / (/index) page.
+        print(uploaded_file)
+        print(url_for('userpage'))
+        return userpage()
     return render_template('upload.html', form=file,authenticated_user=current_user.is_authenticated)
 
 
@@ -181,6 +182,7 @@ def userpage():
     #    unsorted_keys.append([object_summary.key,
     #                          object_summary.last_modified.strftime("%Y-%m-%d %H:%M:%S")])
 #
+    print("CHECK HERE")
     return render_template('userpage.html', name=current_user.username, value=value, video_name=uploaded_file, 
                           range_ang_1=range_ang_1, range_ang_2=range_ang_2, range_user_ang_1=range_user_ang_1, 
                            range_user_ang_2=range_user_ang_2, label=label, first_time=first_time, 
