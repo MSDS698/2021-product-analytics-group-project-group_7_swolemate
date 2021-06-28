@@ -26,30 +26,27 @@ label = None
 @application.route('/index')
 @application.route('/')
 def index():
-    """Index Page : Renders index.html"""
+    """
+    Index Page : Renders index.html
+    """
     return (render_template('index.html'))
-
-
-# @application.route('/team')
-# def team():
-#     """Index Page : Renders index.html with author name."""
-#     return (render_template('team.html', authors=classes.authors))
-
 
 @application.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload():
+    """
+    Upload Page
+    Lets the user upload a video of performing an exercise
+    After the video is uploaded, pose estimation and evaluation is done before directing to the userpage
+    """
     aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID')
     aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
-    # s3_location = 'http://{}.s3.amazonaws.com/'.format(bucket_name)
     bucket_name = "swolemate-s3"
     s3_location = 'https://s3.console.aws.amazon.com/s3/buckets/swolemate-s3'
-    # print(aws_access_key_id)
-    # print(aws_secret_access_key)
 
-    """upload a file from a client machine."""
-    file = classes.UploadFileForm()  # file : UploadFileForm class instance
-    if file.validate_on_submit():  # Check it's a POST request that's valid
+    # upload a file from a client machine. 
+    file = classes.UploadFileForm() 
+    if file.validate_on_submit():
         workout_type = dict(classes.WORKOUT_CHOICES).get(file.exercise_selection.data)
         side = dict(classes.SIDE_CHOICES).get(file.side_selection.data)
         
@@ -60,6 +57,7 @@ def upload():
             'videos', filename
         ))
 
+        # Pose Estimation Model 
         items = filename.split('.')
         subprocess.run([
             'python3', 'detectron2/demo.py',
@@ -71,13 +69,11 @@ def upload():
             'MODEL.DEVICE', 'cpu',
         ])
         
+        # model evaluation
         json_file_name = 'output/' + items[0] + '.json'
-    
         data = load_tester(json_file_name)
-        
         X_train_names = files_in_order('poses_compressed/bicep')
         y_train = get_labels(X_train_names)
-
         X_train_1, X_train_2 = load_features(X_train_names)
         
         global value
@@ -88,31 +84,28 @@ def upload():
         global range_user_ang_2
         global label
         global first_time
-
+        
+        # update all global variables 
         value, _, _, range_ang_1, range_ang_2, range_user_ang_1, range_user_ang_2, label = kmeans_test(['demo'], X_train_names, X_train_1=X_train_1, X_train_2=X_train_2, y_train=y_train, data=data, side=side, bool_val=True, exercise=workout_type)
         first_time = 0
         
+        # send video to s3 so that it can be viewed on the userpage
         session = boto3.Session()
         session.resource("s3")\
             .Bucket(bucket_name)\
             .upload_file(os.path.join('videos', filename), filename)
         uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
         
-        """if request.args.get('debug') != "":
-            return send_file('/app/output/' + items[0] + '.json')"""
-        print(uploaded_file)
-        print(url_for('userpage'))
         return userpage()
     return render_template('upload.html', form=file,authenticated_user=current_user.is_authenticated)
 
 
 @application.route('/register',  methods=('GET', 'POST'))
 def register():
+    """
+    Registration page, allows user to create an account
+    """
     registration_form = classes.RegistrationForm()
-    #if registration_form.validate_on_submit():
-    #    username = registration_form.username.data
-    #    password = registration_form.password.data
-    #    email = registration_form.email.data
     if registration_form.validate_on_submit():
         username = registration_form.username.data
         email = registration_form.email.data
@@ -134,6 +127,9 @@ def register():
 
 @application.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    Allows user to login
+    """
     login_form = classes.LogInForm()
     if login_form.validate_on_submit():
         username = login_form.username.data
@@ -153,13 +149,10 @@ def login():
 @application.route('/logout')
 @login_required
 def logout():
-    # before_logout = '<h1> Before logout - is_autheticated : ' \
-    #                 + str(current_user.is_authenticated) + '</h1>'
-
+    """
+    Allows user to logout
+    """
     logout_user()
-
-    # after_logout = '<h1> After logout - is_autheticated : ' \
-    #                + str(current_user.is_authenticated) + '</h1>'
     return redirect(url_for('index'))
 
 
@@ -174,15 +167,12 @@ def plot_png():
 @application.route('/userpage', methods=['GET', 'POST'])
 @login_required
 def userpage():
-    #bucket_name = "msds603-swolemate-s3"
-    #s3 = boto3.resource('s3')
-    #my_bucket = s3.Bucket(bucket_name)
-
-    #for object_summary in my_bucket.objects.filter():
-    #    unsorted_keys.append([object_summary.key,
-    #                          object_summary.last_modified.strftime("%Y-%m-%d %H:%M:%S")])
-#
-    print("CHECK HERE")
+    """
+    Userpage includes all information about the form of the inputted exercises such as: 
+    - numerical value encoding how good/bad the exercise is
+    - plot showing distance in angles between two poses between inputted exercise and all training samples
+    - plots showing frame by frame angles between 
+    """
     return render_template('userpage.html', name=current_user.username, value=value, video_name=uploaded_file, 
                           range_ang_1=range_ang_1, range_ang_2=range_ang_2, range_user_ang_1=range_user_ang_1, 
                            range_user_ang_2=range_user_ang_2, label=label, first_time=first_time, 
