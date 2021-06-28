@@ -26,3 +26,7 @@ or
 ```shell
 python evaluation_shoulderpress.py video_output.json
 ```
+or
+```shell
+python evaluation_frontraise.py video_output.json 'left'(or 'right')
+```
