@@ -1,2 +1,2 @@
-eb init testv3 --region us-west-2 --platform Docker --key $PEM_NAME 
-eb create testenvv3 --verbose --envvars AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID --envvars AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -i t3.2xlarge
+eb init wkx0 --region us-west-2 --platform Docker --key $PEM_NAME 
+eb create wkxenv0 --verbose --envvars AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID --envvars AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -i t3.2xlarge
