@@ -48,43 +48,43 @@ def upload():
         f = file.file_selector.data  # f : Data of FileField
         filename = secure_filename(f.filename)
         
-        f.save(os.path.join(
-            'videos', filename
-        ))
+        # f.save(os.path.join(
+        #     'videos', filename
+        # ))
 
-        items = filename.split('.')
-        subprocess.run([
-            'python3', 'detectron2/demo.py',
-            '--config-file', 'detectron2_repo/configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml',
-            '--video-input', 'videos/' + filename,
-            '--output', 'output/' + items[0] + '.json',
-            '--opts',
-            'MODEL.WEIGHTS', 'detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl',
-            'MODEL.DEVICE', 'cpu',
-        ])
+        # items = filename.split('.')
+        # subprocess.run([
+        #     'python3', 'detectron2/demo.py',
+        #     '--config-file', 'detectron2_repo/configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml',
+        #     '--video-input', 'videos/' + filename,
+        #     '--output', 'output/' + items[0] + '.json',
+        #     '--opts',
+        #     'MODEL.WEIGHTS', 'detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl',
+        #     'MODEL.DEVICE', 'cpu',
+        # ])
         
-        json_file_name = 'output/' + items[0] + '.json'
+        # json_file_name = 'output/' + items[0] + '.json'
     
-        data = load_tester(json_file_name)
+        # data = load_tester(json_file_name)
         
-        X_train_names = files_in_order('poses_compressed/bicep')
-        y_train = get_labels(X_train_names)
+        # X_train_names = files_in_order('poses_compressed/bicep')
+        # y_train = get_labels(X_train_names)
 
-        X_train_1, X_train_2 = load_features(X_train_names)
+        # X_train_1, X_train_2 = load_features(X_train_names)
 
-        value, _, _ = kmeans_test(['demo'], X_train_1=X_train_1, X_train_2=X_train_2, y_train=y_train, data=data, side=side, bool_val=True, exercise=workout_type)
+        # value, _, _ = kmeans_test(['demo'], X_train_1=X_train_1, X_train_2=X_train_2, y_train=y_train, data=data, side=side, bool_val=True, exercise=workout_type)
         
         
-        """session = boto3.Session()
+        session = boto3.Session()
 
         session.resource("s3")\
             .Bucket(bucket_name)\
             .put_object(Key=filename, Body=f, ACL='public-read-write')
 
         uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
-        """
-        #return redirect(url_for('userpage', value=value))  # Redirect to / (/index) page.
-        return userpage(value)
+        
+        return redirect(url_for('userpage')) #, value=value))  # Redirect to / (/index) page.
+        # return userpage(value)
     return render_template('upload.html', form=file)
 
 
@@ -126,7 +126,7 @@ def login():
         # Login and validate the user.
         if user is not None and user.check_password(password):
             login_user(user)
-            return redirect(url_for('userpage'))
+            return redirect(url_for('upload'))
             # return("<h1> Welcome {}!</h1>".format(username))
 
     return render_template('login.html', form=login_form)
