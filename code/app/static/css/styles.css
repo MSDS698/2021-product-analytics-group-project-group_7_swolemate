@@ -10848,8 +10848,8 @@ textarea.form-control-lg {
 }
 
 header.masthead {
-  position: absolute;
-  background: url("../assets/top_banner.jpeg") no-repeat center center;
+  position: relative;
+  background: url("../assets/workout.jpeg") no-repeat center center;
   width: 100%;
   top: 0;
   left: 0;
