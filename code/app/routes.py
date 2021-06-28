@@ -188,4 +188,4 @@ def userpage():
     return render_template('userpage.html', name=current_user.username, items=unsorted_keys, value=value, video_name=uploaded_file, 
                           range_ang_1=range_ang_1, range_ang_2=range_ang_2, range_user_ang_1=range_user_ang_1, 
                            range_user_ang_2=range_user_ang_2, label=label, first_time=first_time, 
-                           authenticated_user=current_user.is_authenticated))
+                           authenticated_user=current_user.is_authenticated)
