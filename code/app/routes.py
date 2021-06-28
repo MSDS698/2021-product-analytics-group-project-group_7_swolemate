@@ -92,16 +92,14 @@ def upload():
         value, _, _, range_ang_1, range_ang_2, range_user_ang_1, range_user_ang_2, label = kmeans_test(['demo'], X_train_names, X_train_1=X_train_1, X_train_2=X_train_2, y_train=y_train, data=data, side=side, bool_val=True, exercise=workout_type)
         first_time = 0
         
-        # Adding to s3
         session = boto3.Session()
         session.resource("s3")\
             .Bucket(bucket_name)\
-            .put_object(Key=filename, Body=os.path.join('videos', filename), ACL='public-read-write')
-        
+            .upload_file(os.path.join('videos', filename), filename)
         uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/' + filename
         
-        if request.args.get('debug') != "":
-            return send_file('/app/output/' + items[0] + '.json')
+        """if request.args.get('debug') != "":
+            return send_file('/app/output/' + items[0] + '.json')"""
         
         return redirect(url_for('userpage'))  # Redirect to / (/index) page.
     return render_template('upload.html', form=file,authenticated_user=current_user.is_authenticated)
@@ -178,14 +176,12 @@ def userpage():
     #bucket_name = "msds603-swolemate-s3"
     #s3 = boto3.resource('s3')
     #my_bucket = s3.Bucket(bucket_name)
-    unsorted_keys = [[1, '333']]
 
     #for object_summary in my_bucket.objects.filter():
     #    unsorted_keys.append([object_summary.key,
     #                          object_summary.last_modified.strftime("%Y-%m-%d %H:%M:%S")])
 #
-    uploaded_file = 'https://swolemate-s3.s3.us-west-2.amazonaws.com/input.mp4'
-    return render_template('userpage.html', name=current_user.username, items=unsorted_keys, value=value, video_name=uploaded_file, 
+    return render_template('userpage.html', name=current_user.username, value=value, video_name=uploaded_file, 
                           range_ang_1=range_ang_1, range_ang_2=range_ang_2, range_user_ang_1=range_user_ang_1, 
                            range_user_ang_2=range_user_ang_2, label=label, first_time=first_time, 
                            authenticated_user=current_user.is_authenticated)

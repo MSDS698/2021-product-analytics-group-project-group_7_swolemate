@@ -24,7 +24,7 @@
 
           {% if first_time == 0 %}
           <h2>Inputted Video</h2>
-          <video width="320" height="240" controls autoplay muted>
+          <video width="320" height="240" controls autoplay muted loop>
             <source src={{video_name}} type="video/mp4">
             Your browser does not support the video tag.
           </video>
@@ -92,30 +92,5 @@
           <img src="static/assets/Inputted_Form2.jpg" alt="my plot">
             <p>Minimum Angle between Upper Arm and Forearm: {{range_user_ang_2}}</p>
          {% endif %}
-
-          <div class="container">
-
-              <h3>List Files</h3>
-              <table class="table table-hover">
-                <thead class="thead-dark">
-                  <tr>
-                    <th scope="col">File Name</th>
-                    <th scope="col">Time </th>
-                  </tr>
-                </thead>
-                <tbody>
-                {% for item in items %}
-                <tr>
-
-                  <td>  <a href = "/download/{{ item[0] }}">{{ item[0] }} </a> </td>
-                  <td> {{ item[1] }} </td>
-                </tr>
-                {% endfor %}
-
-                </tbody>
-              </table>
-              <br/>
-          </div> 
-
         </body>
 {% endblock %}
