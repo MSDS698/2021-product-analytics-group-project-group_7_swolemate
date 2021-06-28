@@ -1,5 +1,5 @@
 from app import application, classes, db
-from flask import render_template, redirect, url_for, Response, request, send_file,
+from flask import render_template, redirect, url_for, Response, request, send_file
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from utils import *
