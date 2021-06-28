@@ -85,7 +85,7 @@ def upload():
         
         return redirect(url_for('userpage')) #, value=value))  # Redirect to / (/index) page.
         # return userpage(value)
-    return render_template('upload.html', form=file)
+    return render_template('upload.html', form=file, authenticated_user=current_user.is_authenticated)
 
 
 @application.route('/register',  methods=('GET', 'POST'))
@@ -165,4 +165,4 @@ def userpage():
     #    unsorted_keys.append([object_summary.key,
     #                          object_summary.last_modified.strftime("%Y-%m-%d %H:%M:%S")])
 #
-    return render_template('userpage.html', name=current_user.username, items=unsorted_keys)
+    return render_template('userpage.html', name=current_user.username, items=unsorted_keys, authenticated_user=current_user.is_authenticated)
