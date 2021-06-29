@@ -1,17 +1,16 @@
 version: "3"
 services:
   web:
-    build:
-      context: code
-      dockerfile: Dockerfile
+    image: suren12/app_image
     ports:
       - "80:5000"
-    environment:
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     container_name: web
     networks:
       - default
       - swole_net
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+
 networks:
    swole_net:
