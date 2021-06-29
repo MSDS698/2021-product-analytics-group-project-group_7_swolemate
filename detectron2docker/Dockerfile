@@ -30,11 +30,14 @@ RUN pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/c
 WORKDIR /home/appuser/detectron2_repo
 
 COPY demo.py demo/demo.py
+COPY predictor.py demo/predictor.py
 
 # Set a fixed model cache directory.
 ENV FVCORE_CACHE="/tmp"
 
-RUN wget http://images.cocodataset.org/val2017/000000439715.jpg -O input.jpg
+# RUN wget http://images.cocodataset.org/val2017/000000439715.jpg -O input.jpg
 
 # run detectron2 under user "appuser":
-CMD python3 demo/demo.py --config-file configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml --input input.jpg --output outputs/output.json --opts MODEL.WEIGHTS detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl MODEL.DEVICE cpu
+# CMD python3 demo/demo.py --config-file configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml --input input.jpg --output outputs/output.json --opts MODEL.WEIGHTS detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl MODEL.DEVICE cpu
+
+CMD python3 demo/demo.py --config-file configs/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x.yaml --video-input mountdir/input.mp4 --output mountdir/video_output.json --opts MODEL.WEIGHTS detectron2://COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl MODEL.DEVICE cpu

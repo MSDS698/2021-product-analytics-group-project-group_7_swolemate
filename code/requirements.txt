@@ -10,3 +10,5 @@ paramiko
 pip-chill
 psycopg2
 sphinx-rtd-theme
+sklearn
+scipy

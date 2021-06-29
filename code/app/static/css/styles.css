@@ -10849,7 +10849,7 @@ textarea.form-control-lg {
 
 header.masthead {
   position: relative;
-  background: url("../assets/top_banner.jpeg") no-repeat center center;
+  background: url("../assets/banner.jpeg") no-repeat center center;
   background-size: cover;
   padding-top: 8rem;
   padding-bottom: 8rem;
@@ -10868,8 +10868,6 @@ header.masthead h1, header.masthead .h1 {
 }
 @media (min-width: 768px) {
   header.masthead {
-    padding-top: 12rem;
-    padding-bottom: 12rem;
   }
   header.masthead h1, header.masthead .h1 {
     font-size: 3rem;

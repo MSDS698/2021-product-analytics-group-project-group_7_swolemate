@@ -1,50 +1,96 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Video Example</title>
-</head>
-<body>
-  <h2>Welcome {{  name  }}</h2>
-  <h2 style=text-align:left;><a href="{{ url_for('upload') }}">Upload</a></h2>
-  <h2>Upload a video to your personalized AI Feedback</h2>
-  <video width="320" height="240" controls autoplay muted>
-    <source src="https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/shiqi_raisearms.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
-  <video width="320" height="240" controls autoplay muted>
-    <source src="https://msds603-swolemate-s3.s3.us-west-2.amazonaws.com/shiqi_raisearms_output.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
+{% extends "base.html" %}
 
-  <!-- {% block content %} -->
-  <div class="container">
-  
-      <h3>List Files</h3>
-      <table class="table table-hover">
-        <thead class="thead-dark">
-          <tr>
-            <th scope="col">File Name</th>
-            <th scope="col">Time </th>
-          </tr>
-        </thead>
-        <tbody>
-        {% for item in items %}
-        <tr>
-  
-          <td>  <a href = "/download/{{ item[0] }}">{{ item[0] }} </a> </td>
-          <td> {{ item[1] }} </td>
-        </tr>
-        {% endfor %}
-          
-        </tbody>
-      </table>
-      <br/>
-  </div> <!-- /container -->
-  
-  <!-- {% endblock %} -->
+{% block head %}
+{{ super() }}
+{% include "ga.html" %}
+{% endblock %}
 
-  <!-- <h2>Example Graph</h2>
-  <img src="/plot.png" alt="my plot"> -->
+{% block content %}
+        <head>
+          <title>Video Example</title>
+        </head>
+        <body>
+          <h2>Welcome {{  name  }}</h2>
+          <h2 style=text-align:left;><a href="{{ url_for('upload') }}">Upload</a></h2>
+          <h2>Upload a video to your personalized AI Feedback</h2>
+          <video width="320" height="240" controls autoplay muted loop>
+            <source src="https://swolemate-s3.s3.us-west-2.amazonaws.com/shiqi_raisearms.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+          <video width="320" height="240" controls autoplay muted loop>
+            <source src="https://swolemate-s3.s3.us-west-2.amazonaws.com/moh_bicepcurl.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
 
-</body>
-</html>
+          {% if first_time == 0 %}
+          <h2>Inputted Video</h2>
+          <video width="320" height="240" controls autoplay muted loop>
+            <source src={{video_name}} type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+          {% endif %} 
+
+
+         {% if first_time == 0 %}
+         <div class="slidecontainer">
+          <h2>Percentage Numerical Value</h2>
+            {{value}}
+          <input type="range" min="-100" max="100" value={{value}} class="slider" id="myRange", list="tickmarks">
+        </div>
+        <style>
+            .slidecontainer {
+              width: 100%; /* Width of the outside container */
+            }
+
+
+
+            /* The slider itself */
+            .slider {
+              -webkit-appearance: none;  /* Override default CSS styles */
+              appearance: none;
+              width: 100%; /* Full-width */
+              height: 25px; /* Specified height */
+              background: #d3d3d3; /* Grey background */
+              outline: none; /* Remove outline */
+              opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+              -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+              transition: opacity .2s;
+            }
+
+            </style>
+        <script>
+            var slider = document.getElementById("myRange");
+            var output = document.getElementById("demo");
+            output.innerHTML = slider.value; // Display the default slider value
+
+            // Update the current slider value (each time you drag the slider handle)
+            slider.oninput = function() {
+              output.innerHTML = this.value;
+            }
+            </script>
+            <h3>Interpretation</h3>
+            <p>The given scale for the numerical representation above for each inputted video will range from -100% -> 100%. The higher the positive value of the percentage, the better the form of the exercise as compared to bad form values. As the absolute value of the negative percentage value increases, the worse the form of the exercise. </p>
+         {% endif %}
+
+         {% if first_time == 0 %}
+         <h2>How Far Off is Your Form from Good/Bad Form Examples: </h2>
+          <img src="static/assets/image.jpg" alt="my plot">
+         {% endif %} 
+
+         {% if first_time == 0 %}
+         <h2>Good Form Example Plots</h2>
+          <img src="static/assets/Good_Form1.jpg" alt="my plot">
+            <p>Range of {{label}}: {{range_ang_1}}</p>
+          <img src="static/assets/Good_Form2.jpg" alt="my plot">
+            <p>Minimum Angle between Upper Arm and Forearm: {{range_ang_2}}</p>
+         {% endif %}
+
+         {% if first_time == 0 %}
+         <h2>Inputted Form Plots</h2>
+          <img src="static/assets/Inputted_Form1.jpg" alt="my plot">
+            <p>Range of {{label}}: {{range_user_ang_1}}</p>
+          <img src="static/assets/Inputted_Form2.jpg" alt="my plot">
+            <p>Minimum Angle between Upper Arm and Forearm: {{range_user_ang_2}}</p>
+         {% endif %}
+        </body>
+{% endblock %}
