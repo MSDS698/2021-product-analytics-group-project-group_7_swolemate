@@ -9,8 +9,8 @@ services:
       - default
       - swole_net
     environment:
-      - AWS_ACCESS_KEY_ID=AKIAUXVB3DNXBLVCWM22
-      - AWS_SECRET_ACCESS_KEY=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
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
 
 networks:
    swole_net:

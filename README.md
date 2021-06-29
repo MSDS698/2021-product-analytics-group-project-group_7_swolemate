@@ -16,14 +16,20 @@
 
 
 # Technical Components
-Steps To Run: 
-1) Go into the code directory 
-2) Run "docker build -t app_img ."
-3) Run "docker run -e AWS_ACCESS_KEY_ID=AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY -it --rm -p 80:5000 app_img"
-4) Go into the site using Localhost and click "Register" to register an account and "Login"
-5) After Login, automatically redirect to the Upload Page and upload a video with a dropdown of the given exercise and submit
-6) After submitting, if there is an error, manually redirect to "localhost/userpage", otherwise it will automatically redirect
+Steps To Run locally: 
+1) Run docker-compose up 
+2) Go to localhost
+3) Go to register page, then to the login page
+4) Go to the login page, upload video, then automatically goes to results page
 
+Steps to Run on Elastic Beanstalk
+1) Run 'sh deploy.sh'
+2) Go to your Elastic Beanstalk account
+3) Go to the specified envirnoment
+4) Go to configuration on the left side
+5) Go to Load Balancer and click Edit on the page
+6) Go down to Connection Draining and set Draining Timeout to 2000 seconds
+7) Go to the site and follow steps 3 and 4 in "steps to run locally" 
 ## Model
 
 We used Detectron2, which is developed by Facebook AI Research, to detect the movements of human joint points in vedios. And We used the outputs of pose estimation to evaluate videos of professional trainers and users through human pose keypoints. In this project, we evaluated three exercises: bicep curl, front raise, and shoulder press.
