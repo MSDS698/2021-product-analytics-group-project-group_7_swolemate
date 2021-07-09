@@ -22,6 +22,9 @@ Steps To Run locally:
 3) Go to register page, then to the login page
 4) Go to the login page, upload video, then automatically goes to results page
 
+When get to the upload page in the site: 
+- For a quick example, upload the video, 'inputs.mp4' from this github repository as a 'bicep' exercise on the 'left side'
+
 Steps to Run on Elastic Beanstalk
 1) Run 'sh deploy.sh'
 2) Go to your Elastic Beanstalk account
