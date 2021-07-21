@@ -59,4 +59,4 @@ We used Python documentation generation tool to generate document.
 ## Elastic Beanstalk   <img src = './readme/aws.jpeg' height = 20>
 
 We used AWS Elastic Beanstalk to deploy our application, so it's easy to scale and update based on user growth.
-Link: http://testenvv3.eba-dzpuncdn.us-west-2.elasticbeanstalk.com/
+Link: http://group-7-swolemate-final-site.eba-gwuua8ec.us-west-2.elasticbeanstalk.com/
